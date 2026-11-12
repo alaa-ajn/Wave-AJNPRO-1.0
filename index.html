@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بوابة استوديو موجات ظل الروح - علاء البصراوي</title>
+    <style>
+        :root {
+            --bg-color: #050508;
+            --accent-purple: #8e44ad;
+            --accent-blue: #3498db;
+            --accent-pink: #ff007f;
+            --accent-cyan: #00ffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            background: radial-gradient(circle at center, #1a0b2e 0%, #050508 100%);
+            font-family: Tahoma, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            color: #fff;
+            position: relative;
+        }
+
+        /* حاوية الخلفية التفاعلية للثلج والقلوب */
+        canvas.interactive-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .portal-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            padding: 20px;
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            background: rgba(17, 17, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(142, 68, 173, 0.6);
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(142, 68, 173, 0.3);
+        }
+
+        /* تعديل الموضع ليظهر الرأس بوضوح كامل داخل الإطار المربع */
+        .avatar-glow {
+            width: 130px;
+            height: 130px;
+            border-radius: 20px;
+            border: 3px solid var(--accent-cyan);
+            background: #222;
+            background-image: url('my-photo.jpg');
+            background-size: cover;
+            background-position: center 22%;
+            box-shadow: 0 0 25px var(--accent-cyan);
+            animation: pulseAvatar 3s infinite alternate;
+        }
+
+        @keyframes pulseAvatar {
+            0% { transform: scale(1); box-shadow: 0 0 15px var(--accent-cyan); }
+            100% { transform: scale(1.03); box-shadow: 0 0 30px var(--accent-pink); }
+        }
+
+        h1 {
+            font-size: 19px;
+            color: var(--accent-cyan);
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        p {
+            font-size: 13px;
+            color: #ddd;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .buttons-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .portal-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            text-decoration: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .portal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-portrait {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+            box-shadow: 0 5px 20px rgba(142, 68, 173, 0.4);
+        }
+
+        .btn-landscape {
+            background: linear-gradient(45deg, #2980b9, #3498db);
+            box-shadow: 0 5px 20px rgba(41, 128, 185, 0.4);
+        }
+
+        .footer-note {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الخلفية التفاعلية للثلج والقلوب والوميض -->
+    <canvas class="interactive-bg" id="bgCanvas"></canvas>
+
+    <div class="portal-container">
+        <div class="avatar-glow"></div>
+        <h1>استوديو موجات ظل الروح</h1>
+        <p>مرحباً بك يا أبو حسين. اختر وضع العرض المناسب لإنتاج وتصميم فيديوهاتك وأغانيك الإبداعية:</p>
+        
+        <div class="buttons-group">
+            <a href="portrait.html" class="portal-btn btn-portrait">
+                <span>📱</span> الوضع العمودي Pro (ريلز / شورتس)
+            </a>
+            <a href="landscape.html" class="portal-btn btn-landscape">
+                <span>💻</span> الوضع الأفقي Pro (فيديو قياسي عريض)
+            </a>
+        </div>
+
+        <div class="footer-note">إبداعات الفنان علاء البصراوي © 2026</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let particles = [];
+        const numParticles = 40;
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 3 + 1,
+                speedY: Math.random() * 1.2 + 0.4,
+                speedX: (Math.random() - 0.5) * 0.8,
+                alpha: Math.random() * 0.7 + 0.2,
+                isHeart: i % 4 === 0,
+                isSparkle: i % 5 === 0,
+                pulseSpeed: Math.random() * 0.05 + 0.02
+            });
+        }
+
+        function drawHeart(x, y, size, alpha, color) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.translate(x, y);
+            ctx.scale(size, size);
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(0, -3, -5, -15, -15, -15);
+            ctx.bezierCurveTo(-30, -15, -30, 5, -30, 5);
+            ctx.bezierCurveTo(-30, 20, -15, 35, 0, 45);
+            ctx.bezierCurveTo(15, 35, 30, 20, 30, 5);
+            ctx.bezierCurveTo(30, 5, 30, -15, 15, -15);
+            ctx.bezierCurveTo(5, -15, 0, -3, 0, 0);
+            ctx.fillStyle = color;
+            ctx.globalAlpha = alpha;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                p.y += p.speedY;
+                p.x += p.speedX;
+                p.alpha += Math.sin(Date.now() * p.pulseSpeed) * 0.01;
+
+                if (p.y > canvas.height + 10) {
+                    p.y = -10;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x > canvas.width) p.x = 0;
+                if (p.x < 0) p.x = canvas.width;
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha));
+
+                if (p.isHeart) {
+                    drawHeart(p.x, p.y, 0.35, p.alpha, '#ff007f');
+                } else if (p.isSparkle) {
+                    ctx.fillStyle = '#00ffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = '#00ffff';
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.shadowBlur = 6;
+                    ctx.shadowColor = '#ffffff';
+                    ctx.fill();
+                }
+                ctx.restore();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

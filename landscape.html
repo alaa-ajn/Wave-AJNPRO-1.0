@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>استوديو موجات ظل الروح - الوضع الأفقي Pro</title>
+    <style>
+        :root {
+            --bg-color: #050508;
+            --wave-color: #00ffff;
+            --panel-bg: #ffffff;
+            --text-dark: #111111;
+            --border-color: rgba(0, 0, 0, 0.15);
+            --accent-purple: #8e44ad;
+            --accent-orange: #e67e22;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Tahoma, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a0b2e 0%, #050508 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #welcome-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .welcome-snow-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+        .welcome-card {
+            position: relative; z-index: 2; background: rgba(17, 17, 24, 0.92); backdrop-filter: blur(20px);
+            border: 2px solid rgba(41, 128, 185, 0.8); border-radius: 24px; padding: 25px; width: 85%; max-width: 380px;
+            text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; gap: 12px; transform: rotate(90deg);
+        }
+        .welcome-avatar {
+            width: 85px; height: 85px; border-radius: 50%; border: 3px solid #3498db; background: #222;
+            background-image: url('1000188759.png'); background-size: cover; background-position: center top; box-shadow: 0 0 30px rgba(52, 152, 219, 0.7);
+        }
+        .welcome-title { font-size: 17px; font-weight: bold; color: #3498db; margin: 0; }
+        .welcome-subtitle { font-size: 12px; color: #eee; line-height: 1.5; margin: 0; }
+        .welcome-btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; background: linear-gradient(45deg, #2980b9, #3498db); color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
+
+        #rotation-wrapper {
+            position: absolute; width: 100vh; height: 100vw; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(90deg); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        #capture-wrapper { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+
+        .canvas-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 5; display: flex; align-items: center; justify-content: center; }
+        canvas#canvas { width: 100%; height: 100%; display: block; position: absolute; object-fit: cover; }
+
+        #top-bar-container { position: absolute; top: 10px; right: 15px; z-index: 60; display: flex; gap: 8px; }
+        .btn-top-item { background: var(--accent-purple); color: white; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .btn-menu { background: #2980b9; }
+        .btn-styles-toggle { background: linear-gradient(45deg, #8e44ad, #e74c3c); }
+        .btn-main { background: #27ae60; font-size: 12px; padding: 8px 16px; }
+        .btn-rec { background: #c0392b; }
+        .btn-rec.recording { background: #ff0000; box-shadow: 0 0 16px red; }
+
+        #side-menu-drawer {
+            position: absolute; top: 0; right: -300px; width: 300px; height: 100vh; background: var(--panel-bg);
+            border-left: 3px solid var(--accent-purple); z-index: 200; box-shadow: -15px 0 40px rgba(0,0,0,0.8);
+            transition: right 0.3s ease; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; color: var(--text-dark);
+        }
+        #side-menu-drawer.active { right: 0; }
+
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: var(--accent-purple); border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+        .drawer-btn { width: 100%; background: #f4f4f7; color: var(--text-dark); padding: 9px; border: 1px solid var(--border-color); border-radius: 8px; text-align: right; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .drawer-btn:hover { background: #e2d8ec; border-color: var(--accent-purple); }
+        input[type="file"] { display: none; }
+
+        #styles-modal, #text-position-modal, #wave-position-modal, #custom-text-modal, #export-modal, #playlist-modal, #templates-modal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75vw; max-width: 480px; max-height: 75vh;
+            background: var(--panel-bg); border: 2px solid var(--accent-purple); border-radius: 16px; padding: 15px; z-index: 200; display: none; box-shadow: 0 20px 50px rgba(0,0,0,0.9); overflow-y: auto; color: var(--text-dark);
+        }
+        #styles-modal.active, #text-position-modal.active, #wave-position-modal.active, #custom-text-modal.active, #export-modal.active, #playlist-modal.active, #templates-modal.active { display: block; }
+
+        .styles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 8px; margin-top: 10px; }
+        .style-card { background: #f8f8fa; border: 2px solid var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .style-card:hover { border-color: var(--accent-purple); background: #eee; }
+        .style-card.active { border-color: #27ae60; background: rgba(39, 174, 96, 0.15); }
+        .style-thumb { width: 100%; height: 35px; background: #111; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .style-label { font-size: 10px; font-weight: bold; text-align: center; color: var(--text-dark); }
+
+        .export-option-btn { display: block; width: 100%; background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff; padding: 9px; margin: 6px 0; border: none; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .slider-group { margin: 8px 0; text-align: right; }
+        .slider-group label { font-size: 11px; color: var(--accent-purple); display: block; margin-bottom: 3px; font-weight: bold; }
+        .slider-group input[type="range"] { width: 100%; accent-color: var(--accent-purple); height: 5px; }
+        .slider-group input[type="text"], .slider-group select { width: 100%; padding: 6px; background: #f4f4f7; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-dark); font-size: 11px; }
+        .slider-group input[type="color"] { width: 100%; height: 28px; border: none; border-radius: 6px; background: transparent; cursor: pointer; }
+        .btn-reset-center { width: 100%; background: linear-gradient(45deg, #2980b9, #3498db); color: #fff; border: none; border-radius: 6px; padding: 7px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 6px; }
+
+        .playlist-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; padding-bottom: 5px; border-bottom: 2px solid var(--border-color); color: var(--accent-purple); }
+        .edit-title-box { margin-top: 6px; background: #f4f4f7; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .edit-row { display: flex; gap: 5px; margin-top: 4px; }
+        .edit-title-box input[type="text"] { flex: 1; background: #fff; border: 1px solid #ccc; border-radius: 5px; color: #000; padding: 6px; font-size: 11px; }
+        .btn-ai-fix { background: linear-gradient(45deg, #e67e22, #d35400); color: #fff; border: none; border-radius: 5px; padding: 6px 9px; font-size: 10px; font-weight: bold; cursor: pointer; }
+
+        .playlist-items { max-height: 120px; overflow-y: auto; margin-top: 6px; font-size: 11px; }
+        .playlist-item { background: #f4f4f7; color: #000; padding: 6px 8px; margin-bottom: 4px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border-right: 4px solid transparent; cursor: pointer; font-weight: bold; }
+        .playlist-item.active { border-right-color: #27ae60; background: rgba(39, 174, 96, 0.15); }
+
+        #track-info { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.85); border: 2px solid rgba(0, 255, 255, 0.6); padding: 5px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 50; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 5px 25px rgba(0,0,0,0.9); color: #00ffff; }
+        #extra-custom-text { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 45; font-size: 14px; color: #ffffff; font-weight: bold; text-align: center; white-space: nowrap; text-shadow: 0 0 10px #00ffff; pointer-events: none; }
+        #center-badge { position: absolute; width: 90px; height: 90px; background: rgba(18, 18, 26, 0.95); border: 2.5px solid var(--wave-color); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 22px var(--wave-color); z-index: 50; padding: 4px; text-align: center; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.1); }
+        #center-badge .brand { font-size: 14px; font-weight: bold; color: #fff; }
+        #center-badge span.sub { font-size: 8px; color: #aaa; margin-top: 1px; }
+
+        body.hidden-ui #top-bar-container, body.hidden-ui #side-menu-drawer, body.hidden-ui #styles-modal, body.hidden-ui #playlist-modal, body.hidden-ui #export-modal, body.hidden-ui #text-position-modal, body.hidden-ui #wave-position-modal, body.hidden-ui #custom-text-modal, body.hidden-ui #templates-modal, body.hidden-ui #track-info { opacity: 0; pointer-events: none; position: absolute; }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-screen">
+        <canvas class="welcome-snow-container" id="welcomeSnowCanvas"></canvas>
+        <div class="welcome-card">
+            <div class="welcome-avatar"></div>
+            <h1 class="welcome-title">علاء البصراوي - الاستوديو الأفقي</h1>
+            <p class="welcome-subtitle">تم إعداد الواجهة بالكامل لتناسب العرض الأفقي الشامل!</p>
+            <button class="welcome-btn" id="startLandscapeBtn">💻 ابدأ العمل (ملء الشاشة)</button>
+        </div>
+    </div>
+
+    <div id="rotation-wrapper">
+        <div id="capture-wrapper">
+            <div id="top-bar-container">
+                <button class="btn-top-item btn-styles-toggle" id="openStylesModalBtn">🎨 الستايلات</button>
+                <button class="btn-top-item btn-main" id="playBtn" disabled>▶ تشغيل</button>
+                <button class="btn-top-item btn-rec" id="recBtn">🎥 تسجيل</button>
+                <button class="btn-top-item btn-menu" id="openMenuDrawerBtn">⚙️ القائمة</button>
+            </div>
+
+            <div id="side-menu-drawer">
+                <div class="drawer-header">
+                    <span>⚙️ إعدادات الاستوديو الأفقي</span>
+                    <button class="btn-top-item" id="closeMenuDrawerBtn" style="padding: 3px 6px; font-size: 10px; background: #e74c3c;">✕</button>
+                </div>
+                <button class="drawer-btn" id="playlistBtn">🎵 قائمة التشغيل وإدارة النصوص</button>
+                <button class="drawer-btn" id="customTextMenuBtn">✍️ قسم إضافة وتخصيص نص جديد</button>
+                <button class="drawer-btn" id="templatesMenuBtn">📂 إدارة وقوالب التنسيقات المحفوظة</button>
+                <button class="drawer-btn" id="wavePosBtn">🎛️ التحكم بحجم وموقع الموجة والشعار</button>
+                <button class="drawer-btn" id="speedToggleBtn">🚀 سرعة الموجة: 4x</button>
+                <button class="drawer-btn" id="resetAudioBtn">↺ إعادة الصوت من البداية</button>
+                <button class="drawer-btn" id="textPosBtn">📐 التحكم اليدوي بموضع النص</button>
+                <button class="drawer-btn" id="aiAutoBtn">✨ AI ديناميكي (شغال)</button>
+                <button class="drawer-btn" id="aiSyncBtn">⚡ تزامن فائق (شغال)</button>
+                <button class="drawer-btn" id="aiShuffleBtn">🔀 تبديل آلي للستايلات (متوقف)</button>
+                <button class="drawer-btn" id="fullscreenBtn">⛶ ملء الشاشة (Fullscreen)</button>
+                <label class="drawer-btn" for="bgImageFile" style="cursor: pointer;">🖼️ تحميل صورة خلفية مخصصة</label>
+                <input type="file" id="bgImageFile" accept="image/*">
+                <button class="drawer-btn" id="exportBtn" style="background: #27ae60; color: #fff;">📥 تصدير الفيديو أو الصورة</button>
+                <button class="drawer-btn" id="hideUiBtn" style="background: #7f8c8d; color: #fff;">👁️ إخفاء الواجهة بالكامل</button>
+            </div>
+
+            <div id="templates-modal">
+                <div class="playlist-header" style="margin-bottom: 6px;">
+                    <span>📂 قوالب التنسيقات المحفوظة</span>
+                    <button class="btn-top-item" id="closeTemplatesModal" style="padding: 2px 5px; font-size: 9px; background: rgba(0,0,0,0.1); color:#000;">✕</button>
+                </div>
+                <div class="slider-group">
+                    <label>🏷️ اسم القالب الجديد:</label>
+                    <input type="text" id="templateNameInput" placeholder="أدخل اسم القالب...">
+                </div>
+                <button class="export-option-btn" id="saveTemplateBtn" style="background: linear-gradient(45deg, #8e44ad, #9b59b6);">💾 حفظ التنسيقات الحالية كقالب</button>
+                <div style="margin-top: 8px; font-weight: bold; color: var(--text-dark); font-size: 11px;">القوالب المحفوظة:</div>
+                <div class="playlist-items" id="templatesContainer">
+                    <div style="color: #666; text-align: center; padding: 6px; font-size: 10px; font-weight:bold;">لا توجد قوالب محفوظة بعد</div>
+                </div>
+            </div>
+
+            <div id="custom-text-modal">
+                <div class="playlist-header" style="margin-bottom: 6px;">
+                    <span>✍️ إضافة وتخصيص نص جديد</span>
+                    <button class="btn-top-item" id="closeCustomTextModal" style="padding: 2px 5px; font-size: 9px; background: rgba(0,0,0,0.1); color:#000;">✕</button>
+                </div>
+                <div class="slider-group"><label>📝 النص المضاف:</label><input type="text" id="extraTextInput" value="استوديو ظل الروح - علاء البصراوي" placeholder="اكتب النص هنا..."></div>
+                <div class="slider-group"><label>🔍 حجم النص: <span id="valExtraSize">15</span>px</label><input type="range" id="rangeExtraSize" min="10" max="70" value="15"></div>
+                <div class="slider-group"><label>🎨 لون النص:</label><input type="color" id="extraTextColor" value="#ffffff"></div>
+                <div class="slider-group"><label>✨ لون التوهج الخارجي:</label><input type="color" id="extraGlowColor" value="#00ffff"></div>
+                <div class="slider-group"><label>💪 سمك النص:</label><select id="selectFontWeight"><option value="normal">عادي</option><option value="bold" selected>عريض</option><option value="bolder">عريض جداً</option></select></div>
+                <div class="slider-group"><label>✨ شدة التوهج: <span id="valExtraGlow">10</span>px</label><input type="range" id="rangeExtraGlow" min="0" max="40" value="10"></div>
+                <div class="slider-group"><label>↕️ الارتفاع العمودي للنص: <span id="valExtraY">25</span>px</label><input type="range" id="rangeExtraY" min="0" max="400" value="25"></div>
+            </div>
+
+            <div id="wave-position-modal">
+                <div class="playlist-header" style="margin-bottom: 6px;">
+                    <span>🎛️ تحكم الموجة والشعار</span>
+                    <button class="btn-top-item" id="closeWavePosModal" style="padding: 2px 5px; font-size: 9px; background: rgba(0,0,0,0.1); color:#000;">✕</button>
+                </div>
+                <div class="slider-group"><label>🔍 حجم الموجة: <span id="valScale">100</span>%</label><input type="range" id="rangeScale" min="50" max="200" value="100"></div>
+                <div class="slider-group"><label>⭐ حجم الشعار (السنتر): <span id="valLogoScale">110</span>%</label><input type="range" id="rangeLogoScale" min="50" max="200" value="110"></div>
+                <div class="slider-group"><label>↔️ الإزاحة الأفقية: <span id="valWaveX">0</span>px</label><input type="range" id="rangeWaveX" min="-300" max="300" value="0"></div>
+                <div class="slider-group"><label>↕️ الإزاحة العمودية: <span id="valWaveY">0</span>px</label><input type="range" id="rangeWaveY" min="-300" max="300" value="0"></div>
+                <button class="btn-reset-center" id="resetCenterBtn">🎯 رجوع تلقائي لسنتر الشاشة</button>
+            </div>
+
+            <div id="styles-modal">
+                <div class="playlist-header" style="margin-bottom: 6px;">
+                    <span>🎨 اختر قالب الموجة المفضلة لديك</span>
+                    <button class="btn-top-item" id="closeStylesModalBtn" style="padding: 2px 5px; font-size: 9px; background: rgba(0,0,0,0.1); color:#000;">✕</button>
+                </div>
+                <div class="styles-grid" id="stylesGridContainer">
+                    <div class="style-card active" data-style="gemini_5d_cosmos"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #8e44ad); color:#00ffff;">✨G</div><div class="style-label">جيمناي 5D</div></div>
+                    <div class="style-card" data-style="magic_spiral_spread"><div class="style-thumb" style="background: linear-gradient(45deg, #00ffff, #ff00ff); color:#fff;">✨</div><div class="style-label">حلزون سحري</div></div>
+                    <div class="style-card" data-style="spiral_galaxy"><div class="style-thumb" style="background: linear-gradient(45deg, #8e44ad, #00ffff); color:#fff;">🌀</div><div class="style-label">حلزون مجري</div></div>
+                    <div class="style-card" data-style="neon_pulse"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #ff00ff); color:#fff;">💥</div><div class="style-label">نبض نيوني</div></div>
+                    <div class="style-card" data-style="classic_full_spectrum"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #00ffff); color:#fff;">📊</div><div class="style-label">طيف كلاسيكي</div></div>
+                    <div class="style-card" data-style="alaa_pro_1"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #ff007f); color:#fff;">⚡</div><div class="style-label">علاء 1</div></div>
+                    <div class="style-card" data-style="alaa_pro_2"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #e67e22); color:#fff;">👑</div><div class="style-label">علاء 2</div></div>
+                    <div class="style-card" data-style="alaa_pro_3"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #9b59b6); color:#fff;">💫</div><div class="style-label">علاء 3</div></div>
+                    <div class="style-card" data-style="alaa_pro_4"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #27ae60); color:#fff;">🔥</div><div class="style-label">علاء 4</div></div>
+                    <div class="style-card" data-style="wind_sparks"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #00ffff); color:#fff;">🌪️</div><div class="style-label">رياح وشرار</div></div>
+                    <div class="style-card" data-style="radial_spray"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #ff0055); color:#fff;">🎆</div><div class="style-label">رذاذ شعاعي</div></div>
+                    <div class="style-card" data-style="lyre_1"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #00bcd4); color:#fff;">🎻</div><div class="style-label">قيثار 1</div></div>
+                    <div class="style-card" data-style="lyre_2"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #3f51b5); color:#fff;">🎸</div><div class="style-label">قيثار 2</div></div>
+                    <div class="style-card" data-style="lyre_3"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #009688); color:#fff;">🎼</div><div class="style-label">قيثار 3</div></div>
+                    <div class="style-card" data-style="dancer_1"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #e91e63); color:#fff;">💃</div><div class="style-label">راقصة 1</div></div>
+                    <div class="style-card" data-style="love_hearts_1"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #ff007f); color:#fff;">❤️</div><div class="style-label">قلوب 1</div></div>
+                    <div class="style-card" data-style="butterfly_1"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #9b59b6); color:#fff;">🦋</div><div class="style-label">فراشة 1</div></div>
+                    <div class="style-card" data-style="quantum_superwave"><div class="style-thumb" style="background: linear-gradient(45deg, #111, #ff0055); color:#fff;">🌀</div><div class="style-label">كوانتم</div></div>
+                    <div class="style-card" onclick="setChroma('#00FF00')" style="border-color: #2ecc71;"><div class="style-thumb" style="background: #00FF00;">🟢</div><div class="style-label">أخضر كروم</div></div>
+                </div>
+            </div>
+
+            <div id="text-position-modal">
+                <div class="playlist-header" style="margin-bottom: 6px;">
+                    <span>📐 تحكم يدوي بموضع النص</span>
+                    <button class="btn-top-item" id="closeTextPosModal" style="padding: 2px 5px; font-size: 9px; background: rgba(0,0,0,0.1); color:#000;">✕</button>
+                </div>
+                <div class="slider-group"><label>↔️ الموضع الأفقي: <span id="valX">50</span>%</label><input type="range" id="rangeX" min="0" max="100" value="50"></div>
+                <div class="slider-group"><label>↕️ الموضع العمودي: <span id="valY">20</span>px</label><input type="range" id="rangeY" min="0" max="400" value="20"></div>
+            </div>
+
+            <!-- نافذة التصدير الأفقية المحضة (بدون خيار التصدير العمودي) -->
+            <div id="export-modal">
+                <div class="playlist-header" style="margin-bottom: 6px;">
+                    <span>🎯 تصدير العمل</span>
+                    <button class="btn-top-item" id="closeExportModal" style="padding: 2px 5px; font-size: 9px; background: rgba(0,0,0,0.1); color:#000;">✕</button>
+                </div>
+                <button class="export-option-btn" id="exportHorizontalVideoBtn">💻 فيديو أفقي قياسي (1920x1080)</button>
+                <button class="export-option-btn" id="exportImageBtn" style="background: linear-gradient(45deg, #2980b9, #3498db);">🖼️ صورة استوديو عالية الدقة (PNG)</button>
+            </div>
+
+            <div id="playlist-modal">
+                <div class="playlist-header" style="margin-bottom: 6px;">
+                    <span>قائمة التشغيل وإدارة النصوص</span>
+                    <button class="btn-top-item" id="closePlaylist" style="padding: 2px 5px; font-size: 9px; background: rgba(0,0,0,0.1); color:#000;">✕</button>
+                </div>
+                <div style="margin: 6px 0;">
+                    <label class="btn-top-item" for="multiAudioFile" style="display: block; text-align: center; padding: 8px; background: var(--accent-orange); color:#fff; cursor: pointer; border-radius: 6px; font-size: 11px; width:100%;">➕ تحميل ملفات الأغاني الصوتية</label>
+                    <input type="file" id="multiAudioFile" accept="audio/*" multiple>
+                </div>
+                <div class="edit-title-box">
+                    <label style="color:var(--accent-purple); font-size:10px; font-weight:bold;">✏️ تصحيح عنوان الأغنية بالـ AI:</label>
+                    <div class="edit-row">
+                        <input type="text" id="manualTitleInput" placeholder="اكتب اسم الأغنية...">
+                        <button class="btn-ai-fix" id="aiFixTitleBtn">✨ تصحيح AI</button>
+                    </div>
+                </div>
+                <div class="playlist-items" id="playlistContainer">
+                    <div style="color: #666; text-align: center; padding: 8px; font-size: 11px; font-weight:bold;">لم يتم تحميل ملفات صوتية بعد</div>
+                </div>
+            </div>
+
+            <div id="track-info">يعمل الآن: لم يتم اختيار أغنية</div>
+            <div id="extra-custom-text">استوديو ظل الروح - علاء البصراوي</div>
+            
+            <div class="canvas-container">
+                <div id="center-badge">
+                    <div class="brand">AJN</div>
+                    <span class="sub">البصراوي</span>
+                </div>
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio" crossorigin="anonymous"></audio>
+    <script src="waves.js"></script>
+    <script>
+        const welcomeSnowCanvas = document.getElementById('welcomeSnowCanvas');
+        const sCtx = welcomeSnowCanvas.getContext('2d');
+        function resizeWelcomeSnow() { welcomeSnowCanvas.width = window.innerWidth; welcomeSnowCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeWelcomeSnow); resizeWelcomeSnow();
+
+        let welcomeParticles = [];
+        for(let i=0; i<25; i++) {
+            welcomeParticles.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * 3 + 1, speedY: Math.random() * 1.5 + 0.5, speedX: (Math.random() - 0.5) * 1, alpha: Math.random() * 0.7 + 0.3, isHeart: i % 3 === 0 });
+        }
+        function renderWelcomeSnow() {
+            if (document.getElementById('welcome-screen').classList.contains('hidden')) return;
+            requestAnimationFrame(renderWelcomeSnow);
+            sCtx.clearRect(0, 0, welcomeSnowCanvas.width, welcomeSnowCanvas.height);
+            welcomeParticles.forEach(p => {
+                p.y += p.speedY; p.x += p.speedX;
+                if (p.y > window.innerHeight) { p.y = -10; p.x = Math.random() * window.innerWidth; }
+                sCtx.save(); sCtx.globalAlpha = p.alpha;
+                if (p.isHeart) { sCtx.fillStyle = '#ff007f'; sCtx.beginPath(); sCtx.arc(p.x, p.y, 4, 0, Math.PI * 2); sCtx.shadowBlur = 8; sCtx.shadowColor = '#ff007f'; sCtx.fill(); }
+                else { sCtx.fillStyle = '#00ffff'; sCtx.beginPath(); sCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); sCtx.shadowBlur = 6; sCtx.shadowColor = '#00ffff'; sCtx.fill(); }
+                sCtx.restore();
+            });
+        }
+        renderWelcomeSnow();
+
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const startLandscapeBtn = document.getElementById('startLandscapeBtn');
+        function requestFullScreenMode() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => {}); } }
+        startLandscapeBtn.addEventListener('click', () => { requestFullScreenMode(); welcomeScreen.classList.add('hidden'); resizeCanvas(); });
+
+        const multiAudioFile = document.getElementById('multiAudioFile'), bgImageFile = document.getElementById('bgImageFile'), audio = document.getElementById('audio'), playBtn = document.getElementById('playBtn'), resetAudioBtn = document.getElementById('resetAudioBtn'), textPosBtn = document.getElementById('textPosBtn'), textPositionModal = document.getElementById('text-position-modal'), closeTextPosModal = document.getElementById('closeTextPosModal'), rangeX = document.getElementById('rangeX'), rangeY = document.getElementById('rangeY'), valX = document.getElementById('valX'), valY = document.getElementById('valY'), speedToggleBtn = document.getElementById('speedToggleBtn');
+        const wavePosBtn = document.getElementById('wavePosBtn'), wavePositionModal = document.getElementById('wave-position-modal'), closeWavePosModal = document.getElementById('closeWavePosModal'), rangeScale = document.getElementById('rangeScale'), valScale = document.getElementById('valScale'), rangeLogoScale = document.getElementById('rangeLogoScale'), valLogoScale = document.getElementById('valLogoScale'), rangeWaveX = document.getElementById('rangeWaveX'), valWaveX = document.getElementById('valWaveX'), rangeWaveY = document.getElementById('rangeWaveY'), valWaveY = document.getElementById('valWaveY'), resetCenterBtn = document.getElementById('resetCenterBtn');
+        const customTextMenuBtn = document.getElementById('customTextMenuBtn'), customTextModal = document.getElementById('custom-text-modal'), closeCustomTextModal = document.getElementById('closeCustomTextModal'), extraTextInput = document.getElementById('extraTextInput'), rangeExtraSize = document.getElementById('rangeExtraSize'), valExtraSize = document.getElementById('valExtraSize'), extraTextColor = document.getElementById('extraTextColor'), extraGlowColor = document.getElementById('extraGlowColor'), selectFontWeight = document.getElementById('selectFontWeight'), rangeExtraGlow = document.getElementById('rangeExtraGlow'), valExtraGlow = document.getElementById('valExtraGlow'), rangeExtraY = document.getElementById('rangeExtraY'), valExtraY = document.getElementById('valExtraY'), extraCustomText = document.getElementById('extra-custom-text');
+        const templatesMenuBtn = document.getElementById('templatesMenuBtn'), templatesModal = document.getElementById('templates-modal'), closeTemplatesModal = document.getElementById('closeTemplatesModal'), templateNameInput = document.getElementById('templateNameInput'), saveTemplateBtn = document.getElementById('saveTemplateBtn'), templatesContainer = document.getElementById('templatesContainer');
+
+        let savedTemplates = JSON.parse(localStorage.getItem('ajn_studio_landscape_templates') || '[]');
+        let waveScalePercent = 100, logoScalePercent = 110, waveOffsetX = 0, waveOffsetY = 0;
+        const aiAutoBtn = document.getElementById('aiAutoBtn'), aiSyncBtn = document.getElementById('aiSyncBtn'), aiShuffleBtn = document.getElementById('aiShuffleBtn'), fullscreenBtn = document.getElementById('fullscreenBtn'), recBtn = document.getElementById('recBtn'), exportBtn = document.getElementById('exportBtn'), hideUiBtn = document.getElementById('hideUiBtn'), playlistBtn = document.getElementById('playlistBtn'), playlistModal = document.getElementById('playlist-modal'), closePlaylist = document.getElementById('closePlaylist'), playlistContainer = document.getElementById('playlistContainer'), manualTitleInput = document.getElementById('manualTitleInput'), aiFixTitleBtn = document.getElementById('aiFixTitleBtn');
+        const exportModal = document.getElementById('export-modal'), closeExportModal = document.getElementById('closeExportModal'), exportHorizontalVideoBtn = document.getElementById('exportHorizontalVideoBtn'), exportImageBtn = document.getElementById('exportImageBtn');
+        const openMenuDrawerBtn = document.getElementById('openMenuDrawerBtn'), closeMenuDrawerBtn = document.getElementById('closeMenuDrawerBtn'), sideMenuDrawer = document.getElementById('side-menu-drawer'), openStylesModalBtn = document.getElementById('openStylesModalBtn'), closeStylesModalBtn = document.getElementById('closeStylesModalBtn'), stylesModal = document.getElementById('styles-modal'), styleCards = document.querySelectorAll('.style-card[data-style]');
+        const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), trackInfo = document.getElementById('track-info'), centerBadge = document.getElementById('center-badge');
+
+        let audioCtx, analyser, source, dataArray, currentStyle = 'gemini_5d_cosmos', orbitAngle = 0, aiColorTimer = 0, currentAiColor = '#00ffff', isChromaMode = false, customBgActive = false, loadedBgImage = null, aiAutoActive = true, aiSyncActive = true, textPosX = 50, textPosY = 20, aiShuffleActive = false, shuffleInterval = null, playlist = [], currentTrackIndex = 0, mediaRecorder, recordedChunks = [], isRecording = false, particles = [], smokeParticles = [], MAX_PARTICLES = 16, MAX_SMOKE = 10, backgroundModeTimer = 0, currentBgMode = 'snow';
+
+        openMenuDrawerBtn.addEventListener('click', () => sideMenuDrawer.classList.add('active'));
+        closeMenuDrawerBtn.addEventListener('click', () => sideMenuDrawer.classList.remove('active'));
+
+        templatesMenuBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); templatesModal.classList.toggle('active'); renderTemplatesUI(); });
+        closeTemplatesModal.addEventListener('click', () => templatesModal.classList.remove('active'));
+        saveTemplateBtn.addEventListener('click', () => {
+            const tName = templateNameInput.value.trim() || (`قالب ${savedTemplates.length + 1}`);
+            savedTemplates.push({ name: tName, style: currentStyle, waveScale: waveScalePercent, logoScale: logoScalePercent, waveX: waveOffsetX, waveY: waveOffsetY, extraText: extraTextInput.value, extraTextSize: rangeExtraSize.value, extraTextColor: extraTextColor.value, extraGlowColor: extraGlowColor.value, fontWeight: selectFontWeight.value, extraGlow: rangeExtraGlow.value, extraY: rangeExtraY.value, textPosX, textPosY });
+            localStorage.setItem('ajn_studio_landscape_templates', JSON.stringify(savedTemplates));
+            templateNameInput.value = ''; renderTemplatesUI(); alert(`✨ تم حفظ القالب "${tName}" بنجاح يا أبو حسين!`);
+        });
+
+        function renderTemplatesUI() {
+            templatesContainer.innerHTML = '';
+            if (savedTemplates.length === 0) { templatesContainer.innerHTML = '<div style="color: #666; text-align: center; padding: 6px; font-size: 10px; font-weight:bold;">لا توجد قوالب محفوظة بعد</div>'; return; }
+            savedTemplates.forEach((t, index) => {
+                const div = document.createElement('div'); div.className = 'playlist-item';
+                div.innerHTML = `<span>📁 ${t.name}</span> <button style="background:#e74c3c; color:#fff; border:none; padding:2px 6px; border-radius:4px; cursor:pointer;" onclick="loadTemplate(${index})">تطبيق</button>`;
+                templatesContainer.appendChild(div);
+            });
+        }
+        window.loadTemplate = function(index) {
+            const t = savedTemplates[index]; if (!t) return;
+            currentStyle = t.style; styleCards.forEach(c => c.getAttribute('data-style') === currentStyle ? c.classList.add('active') : c.classList.remove('active'));
+            waveScalePercent = t.waveScale; rangeScale.value = waveScalePercent; valScale.textContent = waveScalePercent;
+            logoScalePercent = t.logoScale; rangeLogoScale.value = logoScalePercent; valLogoScale.textContent = logoScalePercent;
+            waveOffsetX = t.waveX; rangeWaveX.value = waveOffsetX; valWaveX.textContent = waveOffsetX;
+            waveOffsetY = t.waveY; rangeWaveY.value = waveOffsetY; valWaveY.textContent = waveOffsetY; updateBadgeTransform();
+            extraTextInput.value = t.extraText; extraCustomText.textContent = t.extraText;
+            rangeExtraSize.value = t.extraTextSize; valExtraSize.textContent = t.extraTextSize; extraCustomText.style.fontSize = t.extraTextSize + 'px';
+            extraTextColor.value = t.extraTextColor; extraCustomText.style.color = t.extraTextColor; extraGlowColor.value = t.extraGlowColor;
+            selectFontWeight.value = t.fontWeight; extraCustomText.style.fontWeight = t.fontWeight;
+            rangeExtraGlow.value = t.extraGlow; valExtraGlow.textContent = t.extraGlow;
+            rangeExtraY.value = t.extraY; valExtraY.textContent = t.extraY; extraCustomText.style.bottom = t.extraY + 'px'; updateExtraTextGlow();
+            textPosX = t.textPosX; rangeX.value = textPosX; valX.textContent = textPosX; trackInfo.style.left = textPosX + '%';
+            textPosY = t.textPosY; rangeY.value = textPosY; valY.textContent = textPosY; trackInfo.style.top = textPosY + 'px';
+            templatesModal.classList.remove('active'); alert(`✨ تم تطبيق القالب "${t.name}" بنجاح!`);
+        };
+
+        customTextMenuBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); customTextModal.classList.toggle('active'); });
+        closeCustomTextModal.addEventListener('click', () => customTextModal.classList.remove('active'));
+        extraTextInput.addEventListener('input', () => { extraCustomText.textContent = extraTextInput.value; });
+        rangeExtraSize.addEventListener('input', () => { valExtraSize.textContent = rangeExtraSize.value; extraCustomText.style.fontSize = rangeExtraSize.value + 'px'; });
+        extraTextColor.addEventListener('input', () => { extraCustomText.style.color = extraTextColor.value; });
+        extraGlowColor.addEventListener('input', updateExtraTextGlow);
+        rangeExtraGlow.addEventListener('input', () => { valExtraGlow.textContent = rangeExtraGlow.value; updateExtraTextGlow(); });
+        function updateExtraTextGlow() { extraCustomText.style.textShadow = `0 0 ${rangeExtraGlow.value}px ${extraGlowColor.value || '#00ffff'}`; }
+        selectFontWeight.addEventListener('change', () => { extraCustomText.style.fontWeight = selectFontWeight.value; });
+        rangeExtraY.addEventListener('input', () => { valExtraY.textContent = rangeExtraY.value; extraCustomText.style.bottom = rangeExtraY.value + 'px'; });
+
+        wavePosBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); wavePositionModal.classList.toggle('active'); });
+        closeWavePosModal.addEventListener('click', () => wavePositionModal.classList.remove('active'));
+        rangeScale.addEventListener('input', () => { waveScalePercent = rangeScale.value; valScale.textContent = waveScalePercent; });
+        rangeLogoScale.addEventListener('input', () => { logoScalePercent = rangeLogoScale.value; valLogoScale.textContent = logoScalePercent; updateBadgeTransform(); });
+        rangeWaveX.addEventListener('input', () => { waveOffsetX = parseInt(rangeWaveX.value); valWaveX.textContent = waveOffsetX; updateBadgeTransform(); });
+        rangeWaveY.addEventListener('input', () => { waveOffsetY = parseInt(rangeWaveY.value); valWaveY.textContent = waveOffsetY; updateBadgeTransform(); });
+        resetCenterBtn.addEventListener('click', () => { waveOffsetX = 0; waveOffsetY = 0; logoScalePercent = 110; waveScalePercent = 100; rangeWaveX.value = 0; rangeWaveY.value = 0; rangeLogoScale.value = 110; rangeScale.value = 100; valWaveX.textContent = "0"; valWaveY.textContent = "0"; valLogoScale.textContent = "110"; valScale.textContent = "100"; updateBadgeTransform(); });
+        function updateBadgeTransform() { centerBadge.style.transform = `translate(calc(-50% + ${waveOffsetX}px), calc(-50% + ${waveOffsetY}px)) scale(${logoScalePercent / 100})`; }
+
+        openStylesModalBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); stylesModal.classList.add('active'); });
+        closeStylesModalBtn.addEventListener('click', () => stylesModal.classList.remove('active'));
+        styleCards.forEach(card => card.addEventListener('click', () => { styleCards.forEach(c => c.classList.remove('active')); card.classList.add('active'); currentStyle = card.getAttribute('data-style'); stylesModal.classList.remove('active'); }));
+
+        speedToggleBtn.addEventListener('click', () => toggleWaveSpeed(speedToggleBtn));
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth * window.devicePixelRatio;
+            canvas.height = container.clientHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            initElements();
+        }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        function initElements() {
+            particles = []; for (let i = 0; i < MAX_PARTICLES; i++) resetParticle(i, true);
+            smokeParticles = []; for (let i = 0; i < MAX_SMOKE; i++) resetSmoke(i, true);
+        }
+        function resetParticle(index, randomY = false) {
+            const w = canvas.width / window.devicePixelRatio, h = canvas.height / window.devicePixelRatio;
+            particles[index] = { x: Math.random() * w, y: randomY ? Math.random() * h : -10, speedX: (Math.random() - 0.5) * 3.5, speedY: Math.random() * 2.5 + 1.2, alpha: Math.random() * 0.8 + 0.2 };
+        }
+        function resetSmoke(index, randomY = false) {
+            const w = canvas.width / window.devicePixelRatio, h = canvas.height / window.devicePixelRatio;
+            smokeParticles[index] = { x: Math.random() * w, y: randomY ? Math.random() * h : h + 20, radius: Math.random() * 35 + 20, speedY: -(Math.random() * 0.6 + 0.3), alpha: Math.random() * 0.12 + 0.03 };
+        }
+        function updateAndRenderEnvironment(bassVolume) {
+            const w = canvas.width / window.devicePixelRatio, h = canvas.height / window.devicePixelRatio;
+            const syncMultiplier = aiSyncActive ? 2.8 : 1.4, bassFactor = (bassVolume / 140) * syncMultiplier;
+            backgroundModeTimer++; if (backgroundModeTimer % 300 === 0) currentBgMode = currentBgMode === 'snow' ? 'hearts' : 'snow';
+            smokeParticles.forEach((s, i) => {
+                s.y += s.speedY * (1 + bassFactor * 0.3) * globalWaveSpeed; if (s.y < -50) { resetSmoke(i, false); }
+                ctx.save(); ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2); ctx.fillStyle = currentAiColor; ctx.globalAlpha = s.alpha * 0.6; ctx.filter = 'blur(12px)'; ctx.fill(); ctx.restore();
+            });
+            particles.forEach((p, i) => {
+                p.x += p.speedX * syncMultiplier * 0.8 * globalWaveSpeed; p.y += p.speedY * (1 + bassFactor * 0.8) * globalWaveSpeed;
+                if (p.y > h || p.x < 0 || p.x > w) resetParticle(i, false);
+                ctx.save(); ctx.globalAlpha = p.alpha;
+                if (currentBgMode === 'snow') {
+                    if (i % 3 === 0) drawSmallHeart(ctx, p.x, p.y, 0.32 + bassFactor * 0.18, currentAiColor);
+                    else { ctx.beginPath(); ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 6; ctx.shadowColor = currentAiColor; ctx.fill(); }
+                } else {
+                    if (i % 4 === 0) { ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill(); }
+                    else drawSmallHeart(ctx, p.x, p.y, 0.4 + bassFactor * 0.22, currentAiColor);
+                }
+                ctx.restore();
+            });
+        }
+        function drawSmallHeart(ctx, x, y, size, color) {
+            ctx.save(); ctx.beginPath(); ctx.translate(x, y); ctx.scale(size, size); ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(0, -3, -5, -15, -15, -15); ctx.bezierCurveTo(-30, -15, -30, 5, -30, 5);
+            ctx.bezierCurveTo(-30, 20, -15, 35, 0, 45); ctx.bezierCurveTo(15, 35, 30, 20, 30, 5);
+            ctx.bezierCurveTo(30, 5, 30, -15, 15, -15); ctx.bezierCurveTo(5, -15, 0, -3, 0, 0);
+            ctx.fillStyle = color; ctx.shadowBlur = 8; ctx.shadowColor = color; ctx.fill(); ctx.restore();
+        }
+
+        textPosBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); textPositionModal.classList.toggle('active'); });
+        closeTextPosModal.addEventListener('click', () => textPositionModal.classList.remove('active'));
+        rangeX.addEventListener('input', () => { textPosX = rangeX.value; valX.textContent = textPosX; trackInfo.style.left = textPosX + '%'; });
+        rangeY.addEventListener('input', () => { textPosY = rangeY.value; valY.textContent = textPosY; trackInfo.style.top = textPosY + 'px'; });
+
+        resetAudioBtn.addEventListener('click', () => { if (audio) { audio.currentTime = 0; if (audio.paused) { audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); } } });
+        function setChroma(color) { isChromaMode = true; customBgActive = false; loadedBgImage = null; document.body.style.backgroundImage = 'none'; document.body.style.backgroundColor = color; stylesModal.classList.remove('active'); sideMenuDrawer.classList.remove('active'); }
+        bgImageFile.addEventListener('change', function(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const imageUrl = URL.createObjectURL(file); document.body.style.backgroundImage = `url('${imageUrl}')`;
+            const img = new Image(); img.src = imageUrl; img.onload = () => { loadedBgImage = img; };
+            customBgActive = true; isChromaMode = false;
+        });
+
+        aiAutoBtn.addEventListener('click', () => { aiAutoActive = !aiAutoActive; aiAutoBtn.textContent = aiAutoActive ? "✨ AI ديناميكي (شغال)" : "💤 AI ديناميكي (متوقف)"; });
+        aiSyncBtn.addEventListener('click', () => { aiSyncActive = !aiSyncActive; aiSyncBtn.textContent = aiSyncActive ? "⚡ تزامن فائق (شغال)" : "💤 تزامن عادي"; });
+        aiShuffleBtn.addEventListener('click', () => {
+            aiShuffleActive = !aiShuffleActive;
+            if (aiShuffleActive) { aiShuffleBtn.textContent = "🔀 تبديل آلي (شغال)"; startShuffle(); } else { aiShuffleBtn.textContent = "🔀 تبديل آلي (متوقف)"; stopShuffle(); }
+        });
+        function startShuffle() {
+            if (shuffleInterval) clearInterval(shuffleInterval);
+            shuffleInterval = setInterval(() => {
+                if (!aiShuffleActive) return;
+                let available = allStyles.filter(s => s !== currentStyle);
+                currentStyle = available[Math.floor(Math.random() * available.length)];
+                styleCards.forEach(card => card.getAttribute('data-style') === currentStyle ? card.classList.add('active') : card.classList.remove('active'));
+            }, 5000);
+        }
+        function stopShuffle() { if (shuffleInterval) { clearInterval(shuffleInterval); shuffleInterval = null; } }
+
+        fullscreenBtn.addEventListener('click', () => { requestFullScreenMode(); sideMenuDrawer.classList.remove('active'); });
+        exportBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); exportModal.classList.toggle('active'); });
+        closeExportModal.addEventListener('click', () => exportModal.classList.remove('active'));
+        exportImageBtn.addEventListener('click', () => { exportModal.classList.remove('active'); const link = document.createElement('a'); link.download = 'AJN_studio_landscape_snapshot.png'; link.href = canvas.toDataURL('image/png'); link.click(); alert("✨ تم حفظ لقطة الشاشة بدقة عالية!"); });
+        exportHorizontalVideoBtn.addEventListener('click', () => { exportModal.classList.remove('active'); startCustomRecording(1920, 1080, 'AJN_Studio_Widescreen.webm'); });
+
+        async function startCustomRecording(targetWidth, targetHeight, fileName) {
+            if (!audioCtx) initAudioContext();
+            if (audio.paused) { audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); }
+            sideMenuDrawer.classList.remove('active'); exportModal.classList.remove('active');
+            const exportCanvas = document.createElement('canvas'); exportCanvas.width = targetWidth; exportCanvas.height = targetHeight; const expCtx = exportCanvas.getContext('2d');
+            recordedChunks = []; const exportStream = exportCanvas.captureStream(30); const destNode = audioCtx.createMediaStreamDestination(); source.connect(destNode);
+            const combinedStream = new MediaStream([...exportStream.getVideoTracks(), ...destNode.stream.getAudioTracks()]);
+            try { mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus' }); } catch (e) { try { mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' }); } catch (err) { mediaRecorder = new MediaRecorder(combinedStream); } }
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' }); const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = fileName; a.click(); alert(`🎬 تم تصدير فيديو الاستوديو الأفقي بنجاح!`);
+            };
+            mediaRecorder.start(); isRecording = true; recBtn.textContent = "🎥 إيقاف التسجيل"; recBtn.classList.add('recording');
+            function recordLoop() {
+                if (!isRecording) return;
+                expCtx.clearRect(0, 0, targetWidth, targetHeight);
+                if (customBgActive && loadedBgImage) {
+                    const imgRatio = loadedBgImage.width / loadedBgImage.height, targetRatio = targetWidth / targetHeight;
+                    let drawW = targetWidth, drawH = targetHeight, drawX = 0, drawY = 0;
+                    if (imgRatio > targetRatio) { drawW = targetHeight * imgRatio; drawX = (targetWidth - drawW) / 2; } else { drawH = targetWidth / imgRatio; drawY = (targetHeight - drawH) / 2; }
+                    expCtx.drawImage(loadedBgImage, drawX, drawY, drawW, drawH);
+                } else if (isChromaMode) { expCtx.fillStyle = document.body.style.backgroundColor || '#00FF00'; expCtx.fillRect(0, 0, targetWidth, targetHeight); }
+                else { const bgGrad = expCtx.createRadialGradient(targetWidth/2, targetHeight/2, 40, targetWidth/2, targetHeight/2, targetWidth*0.75); bgGrad.addColorStop(0, '#0f081c'); bgGrad.addColorStop(1, '#020205'); expCtx.fillStyle = bgGrad; expCtx.fillRect(0, 0, targetWidth, targetHeight); }
+                expCtx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+                const customTextStr = extraTextInput.value;
+                if (customTextStr) {
+                    expCtx.save(); const scaleYFactor = targetHeight / window.innerHeight;
+                    expCtx.font = `${selectFontWeight.value} ${parseInt(rangeExtraSize.value) * scaleYFactor}px Tahoma`;
+                    expCtx.fillStyle = extraTextColor.value || '#ffffff'; expCtx.textAlign = "center"; expCtx.textBaseline = "middle";
+                    expCtx.shadowBlur = parseInt(rangeExtraGlow.value) * scaleYFactor; expCtx.shadowColor = extraGlowColor.value || '#00ffff';
+                    expCtx.fillText(customTextStr, targetWidth / 2, targetHeight - (parseInt(rangeExtraY.value) * scaleYFactor)); expCtx.restore();
+                }
+                const recCenterX = (targetWidth / 2) + waveOffsetX, recCenterY = (targetHeight / 2) + waveOffsetY, recLogoScale = logoScalePercent / 100;
+                expCtx.save(); expCtx.translate(recCenterX, recCenterY); expCtx.scale(recLogoScale, recLogoScale);
+                expCtx.beginPath(); expCtx.arc(0, 0, 40, 0, Math.PI * 2); expCtx.fillStyle = 'rgba(18, 18, 26, 0.95)'; expCtx.strokeStyle = currentAiColor; expCtx.lineWidth = 3; expCtx.shadowBlur = 20; expCtx.shadowColor = currentAiColor; expCtx.fill(); expCtx.stroke();
+                expCtx.font = "bold 18px Tahoma"; expCtx.fillStyle = "#fff"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle"; expCtx.fillText("AJN", 0, -5);
+                expCtx.font = "10px Tahoma"; expCtx.fillStyle = "#aaa"; expCtx.fillText("البصراوي", 0, 12); expCtx.restore();
+                const titleText = trackInfo.textContent || "علاء البصراوي - استوديو ظل الروح";
+                expCtx.save(); expCtx.font = "bold 16px Tahoma"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle";
+                const textWidth = expCtx.measureText(titleText).width + 50, boxX = (targetWidth * (textPosX / 100)) - (textWidth / 2), boxY = textPosY * (targetHeight / window.innerHeight);
+                expCtx.beginPath(); expCtx.roundRect(boxX, boxY, textWidth, 40, 20); expCtx.fillStyle = "rgba(0, 0, 0, 0.85)"; expCtx.strokeStyle = "rgba(0, 255, 255, 0.6)"; expCtx.lineWidth = 2; expCtx.shadowBlur = 15; expCtx.shadowColor = "rgba(0,0,0,0.9)"; expCtx.fill(); expCtx.stroke();
+                expCtx.fillStyle = "#00ffff"; expCtx.shadowBlur = 8; expCtx.shadowColor = "#00ffff"; expCtx.fillText(titleText, boxX + (textWidth / 2), boxY + 20); expCtx.restore();
+                requestAnimationFrame(recordLoop);
+            }
+            recordLoop();
+        }
+
+        recBtn.addEventListener('click', () => { if (!isRecording) startCustomRecording(1920, 1080, 'AJN_Studio_FHD_Horizontal.webm'); else stopActiveRecording(); });
+        function stopActiveRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecording = false; recBtn.textContent = "🎥 تسجيل"; recBtn.classList.remove('recording'); document.body.classList.remove('hidden-ui'); }
+        window.addEventListener('dblclick', () => { if (isRecording) stopActiveRecording(); else document.body.classList.toggle('hidden-ui'); });
+
+        playlistBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); playlistModal.classList.toggle('active'); });
+        closePlaylist.addEventListener('click', () => playlistModal.classList.remove('active'));
+        hideUiBtn.addEventListener('click', () => { document.body.classList.add('hidden-ui'); sideMenuDrawer.classList.remove('active'); requestFullScreenMode(); });
+
+        multiAudioFile.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files); if (files.length === 0) return;
+            files.forEach(file => playlist.push(file)); renderPlaylistUI();
+            if (audio.paused && playlist.length === files.length) { currentTrackIndex = 0; loadTrack(currentTrackIndex); playBtn.disabled = false; }
+        });
+        function renderPlaylistUI() {
+            playlistContainer.innerHTML = '';
+            if (playlist.length === 0) { playlistContainer.innerHTML = '<div style="color: #666; text-align: center; padding: 6px; font-size: 10px; font-weight:bold;">لم يتم تحميل ملفات صوتية بعد</div>'; return; }
+            playlist.forEach((file, index) => {
+                const div = document.createElement('div'); div.className = 'playlist-item'; if (index === currentTrackIndex) div.classList.add('active');
+                div.innerHTML = `<span>${index + 1}. ${file.name}</span> ${index === currentTrackIndex ? '<span style="color:#27ae60;">● يعمل</span>' : ''}`;
+                div.onclick = () => { currentTrackIndex = index; loadTrack(currentTrackIndex); audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderPlaylistUI(); };
+                playlistContainer.appendChild(div);
+            });
+        }
+        function loadTrack(index) {
+            if (!playlist[index]) return; const file = playlist[index], cleanName = file.name.replace(/\.[^/.]+$/, "");
+            manualTitleInput.value = cleanName; trackInfo.textContent = "يعمل الآن: " + cleanName;
+            audio.src = URL.createObjectURL(file); initAudioContext(); playBtn.disabled = false;
+        }
+        manualTitleInput.addEventListener('input', () => { if (manualTitleInput.value.trim()) trackInfo.textContent = "يعمل الآن: " + manualTitleInput.value.trim(); });
+        aiFixTitleBtn.addEventListener('click', () => {
+            let currentText = manualTitleInput.value.trim() || (playlist[currentTrackIndex] ? playlist[currentTrackIndex].name.replace(/\.[^/.]+$/, "") : "");
+            if (!currentText) { alert("الرجاء تحميل ملف صوتي أو إدخال نص أولاً!"); return; }
+            let cleaned = currentText.replace(/[_.-]/g, ' ').replace(/\s+/g, ' ').trim();
+            if (!cleaned.includes("علاء البصراوي")) cleaned += " - علاء البصراوي";
+            manualTitleInput.value = cleaned; trackInfo.textContent = "يعمل الآن: " + cleaned; alert("✨ تمت عملية التصحيح والتنسيق الذكي بنجاح!");
+        });
+        audio.addEventListener('ended', () => { if (playlist.length > 0) { currentTrackIndex = (currentTrackIndex + 1) % playlist.length; loadTrack(currentTrackIndex); audio.play(); requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderPlaylistUI(); } });
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser(); source = audioCtx.createMediaElementSource(audio);
+                source.connect(analyser); analyser.connect(audioCtx.destination); analyser.fftSize = 256;
+            }
+        }
+        playBtn.addEventListener('click', () => {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            if (audio.paused) { audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); }
+            else { audio.pause(); playBtn.textContent = "▶ تشغيل"; document.body.classList.remove('hidden-ui'); }
+        });
+
+        function renderFrame() {
+            if (audio.paused) return; requestAnimationFrame(renderFrame);
+            const bufferLength = analyser.frequencyBinCount; if (!dataArray) dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+            const displayWidth = canvas.clientWidth, displayHeight = canvas.clientHeight; ctx.clearRect(0, 0, displayWidth, displayHeight);
+            aiColorTimer++; const speedFactor = aiSyncActive ? 3.0 : 1.5;
+            if (aiAutoActive && aiColorTimer % Math.max(1, Math.floor(8 / speedFactor)) === 0) {
+                const waveColors = ['#00ffff', '#ff007f', '#ffcc00', '#9b59b6', '#00ffcc', '#3498db', '#e74c3c'];
+                currentAiColor = waveColors[Math.floor(Math.random() * waveColors.length)];
+                centerBadge.style.borderColor = currentAiColor; centerBadge.style.boxShadow = `0 0 22px ${currentAiColor}`;
+                if (!isChromaMode && !customBgActive) {
+                    ctx.save(); const bgGrad = ctx.createRadialGradient(displayWidth/2, displayHeight/2, 40, displayWidth/2, displayHeight/2, displayWidth*0.75);
+                    bgGrad.addColorStop(0, '#0f081c'); bgGrad.addColorStop(1, '#020205'); ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, displayWidth, displayHeight); ctx.restore();
+                }
+            }
+            let midSum = 0; const midStart = Math.floor(bufferLength * 0.15), midEnd = Math.floor(bufferLength * 0.45);
+            for (let i = midStart; i < midEnd; i++) midSum += dataArray[i]; const midVolume = midSum / (midEnd - midStart);
+            let bassSum = 0; for (let i = 0; i < 15; i++) bassSum += dataArray[i]; const bassVolume = bassSum / 15;
+            if (customBgActive && midVolume > 35) document.body.style.backgroundPosition = `calc(50% + ${(Math.random() - 0.5) * (midVolume / 18)}px) calc(50% + ${(Math.random() - 0.5) * (midVolume / 18)}px)`;
+            else document.body.style.backgroundPosition = 'center center';
+
+            updateAndRenderEnvironment(bassVolume);
+            orbitAngle += (0.05 + (bassVolume / 220)) * speedFactor * globalWaveSpeed;
+            const centerX = (displayWidth / 2) + waveOffsetX, centerY = (displayHeight / 2) + waveOffsetY;
+            const maxAllowedRadius = (Math.min(displayWidth, displayHeight) * 0.45) * (parseInt(document.getElementById('rangeScale').value) / 100);
+            const dynamicScaleFactor = Math.min(1.15, 0.7 + (bassVolume / 220)) * (parseInt(document.getElementById('rangeScale').value) / 100);
+
+            ctx.save(); ctx.translate(centerX, centerY);
+            renderWaveStyle(ctx, currentStyle, currentAiColor, currentAiColor, maxAllowedRadius, dynamicScaleFactor, bassVolume, orbitAngle, dataArray, bufferLength);
+            ctx.restore();
+        }
+    </script>
+</body>
+</html>
