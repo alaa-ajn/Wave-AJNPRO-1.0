@@ -20,7 +20,7 @@
         body {
             margin: 0; 
             background-color: var(--bg-color); 
-            background-image: url('my-photo.jpg'); /* صورتك كخلفية افتراضية رئيسية */
+            background-image: url('my-photo.jpg'); 
             background-size: cover; 
             background-position: center 22%; 
             background-repeat: no-repeat;
@@ -35,15 +35,15 @@
             color: #fff; 
         }
 
-        #top-bar-container { position: absolute; top: 10px; right: 15px; z-index: 60; display: flex; gap: 8px; }
-        .btn-top-item { background: var(--accent-purple); color: white; padding: 10px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        #top-bar-container { position: absolute; top: 10px; right: 15px; z-index: 60; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 95vw; }
+        .btn-top-item { background: var(--accent-purple); color: white; padding: 7px 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         .btn-menu { background: #2980b9; }
         .btn-styles-toggle { background: linear-gradient(45deg, #8e44ad, #e74c3c); }
-        .btn-main { background: #27ae60; font-size: 14px; padding: 10px 20px; }
+        .btn-main { background: #27ae60; font-size: 12px; padding: 7px 12px; }
         .btn-rec { background: #c0392b; }
-        .btn-rec.recording { background: #ff0000; box-shadow: 0 0 16px red; }
+        .btn-free-rec { background: #e67e22; }
+        .btn-rec.recording, .btn-free-rec.recording { background: #ff0000; box-shadow: 0 0 16px red; }
 
-        /* تصغير القائمة الجانبية الرئيسية لتصبح مدمجة */
         #side-menu-drawer {
             position: absolute; top: 0; right: -280px; width: 260px; height: 100vh; background: rgba(18, 18, 26, 0.92);
             backdrop-filter: blur(15px); border-left: 2px solid var(--accent-purple); z-index: 200; box-shadow: -15px 0 40px rgba(0,0,0,0.8);
@@ -56,7 +56,6 @@
         .drawer-btn:hover { background: rgba(142, 68, 173, 0.4); border-color: var(--accent-purple); }
         input[type="file"] { display: none; }
 
-        /* جميع القوائم المنبثقة شفافة وزجاجية (Glassmorphism) */
         #styles-modal, #text-position-modal, #wave-position-modal, #custom-text-modal, #export-modal, #playlist-modal, #templates-modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 88%; max-width: 400px;
             background: rgba(15, 15, 22, 0.88); backdrop-filter: blur(20px); border: 2px solid #8e44ad; border-radius: 16px; padding: 15px; z-index: 200; display: none; box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 20px rgba(142, 68, 173, 0.3); color: #fff; max-height: 82vh; overflow-y: auto;
@@ -88,13 +87,12 @@
         .playlist-item { background: rgba(255,255,255,0.06); color: #fff; padding: 7px 10px; margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-right: 4px solid transparent; cursor: pointer; font-weight: bold; }
         .playlist-item.active { border-right-color: #27ae60; background: rgba(39, 174, 96, 0.25); }
 
-        #track-info { position: absolute; top: 65px; left: 50%; transform: translate(-50%, 0); background: rgba(0, 0, 0, 0.85); border: 2px solid rgba(0, 255, 255, 0.5); padding: 8px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 50; max-width: 85%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 5px 25px rgba(0,0,0,0.9); color: #00ffff; }
+        #track-info { position: absolute; top: 65px; left: 50%; transform: translate(-50%, 0); background: rgba(0, 0, 0, 0.85); border: 2.5px solid rgba(0, 255, 255, 0.5); padding: 8px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 50; max-width: 85%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 5px 25px rgba(0,0,0,0.9); color: #00ffff; }
         #extra-custom-text { position: absolute; top: 260px; left: 50%; transform: translate(-50%, 0); z-index: 45; font-size: 18px; color: #ffffff; font-weight: bold; text-align: center; white-space: nowrap; text-shadow: 0 0 10px #00ffff; pointer-events: none; }
         #capture-wrapper { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
         .canvas-container { position: absolute; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 5; top: 0; left: 0; }
         canvas#canvas { width: 100%; height: 100%; display: block; position: absolute; object-fit: cover; }
         
-        /* الشعار بالسنتر بالقيم الافتراضية الجديدة (حجم 92%، إزاحة عمودية 180px)[span_7](start_span)[span_7](end_span) */
         #center-badge { position: absolute; width: 120px; height: 120px; background: rgba(18, 18, 26, 0.95); border: 2.5px solid var(--wave-color); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 22px var(--wave-color); z-index: 50; padding: 4px; text-align: center; transform: translate(-50%, calc(-50% + 180px)) scale(0.92); left: 50%; top: 50%; }
         #center-badge .brand { font-size: 18px; font-weight: bold; color: #fff; }
         #center-badge span.sub { font-size: 10px; color: #aaa; margin-top: 1px; }
@@ -107,7 +105,8 @@
         <div id="top-bar-container">
             <button class="btn-top-item btn-styles-toggle" id="openStylesModalBtn">🎨 الستايلات</button>
             <button class="btn-top-item btn-main" id="playBtn" disabled>▶ تشغيل</button>
-            <button class="btn-top-item btn-rec" id="recBtn">🎥 تسجيل</button>
+            <button class="btn-top-item btn-rec" id="recBtn">🎥 من البداية</button>
+            <button class="btn-top-item btn-free-rec" id="freeRecBtn">⏺ تسجيل حر</button>
             <button class="btn-top-item btn-menu" id="openMenuDrawerBtn">⚙️ القائمة</button>
         </div>
 
@@ -144,7 +143,6 @@
             <div class="playlist-items" id="templatesContainer"><div style="color: #aaa; text-align: center; padding: 8px; font-size: 11px; font-weight:bold;">لا توجد قوالب محفوظة بعد</div></div>
         </div>
 
-        <!-- قسم النص الإضافي الاحترافي (مع خلفية وبوردر فخم) -->
         <div id="custom-text-modal">
             <div class="playlist-header" style="margin-bottom: 8px;">
                 <span>✍️ هندسة وتخصيص النص الإضافي</span>
@@ -161,7 +159,6 @@
             </div>
         </div>
 
-        <!-- نافذة تحكم الموجة والشعار (بالقيم الافتراضية الجديدة 62% و 92% و 180px)[span_8](start_span)[span_8](end_span) -->
         <div id="wave-position-modal">
             <div class="playlist-header" style="margin-bottom: 8px;">
                 <span>🎛️ تحكم الموجة والشعار</span>
@@ -254,17 +251,13 @@
     <audio id="audio" crossorigin="anonymous"></audio>
     <script src="waves.js"></script>
     <script>
-        // تعيين القيم الافتراضية الجديدة للموجة والشعار بناءً على صورتك[span_9](start_span)[span_9](end_span)
         let waveScalePercent = 62, logoScalePercent = 92, waveOffsetX = 0, waveOffsetY = 180;
 
-        // مصفوفة التشغيل تبدأ تلقائياً بأغنية "دلع حبيبي"
         let playlist = [
-    { name: "الدلع حبيبي - علاء البصراوي", url: "الدلع حبيبي_ علاء البصراوي.mp3" }
-];
-
+            { name: "علاء البصراوي - دلع حبيبي", url: "الدلع حبيبي_ علاء البصراوي.mp3" }
+        ];
         let currentTrackIndex = 0;
 
-        // تحميل الأغنية الافتراضية فور فتح الصفحة
         window.addEventListener('DOMContentLoaded', () => {
             loadDefaultTrack();
         });
@@ -286,14 +279,13 @@
         const templatesMenuBtn = document.getElementById('templatesMenuBtn'), templatesModal = document.getElementById('templates-modal'), closeTemplatesModal = document.getElementById('closeTemplatesModal'), templateNameInput = document.getElementById('templateNameInput'), saveTemplateBtn = document.getElementById('saveTemplateBtn'), templatesContainer = document.getElementById('templatesContainer');
 
         let savedTemplates = JSON.parse(localStorage.getItem('ajn_studio_portrait_templates') || '[]');
-        const aiAutoBtn = document.getElementById('aiAutoBtn'), aiSyncBtn = document.getElementById('aiSyncBtn'), aiShuffleBtn = document.getElementById('aiShuffleBtn'), fullscreenBtn = document.getElementById('fullscreenBtn'), recBtn = document.getElementById('recBtn'), exportBtn = document.getElementById('exportBtn'), hideUiBtn = document.getElementById('hideUiBtn'), playlistBtn = document.getElementById('playlistBtn'), playlistModal = document.getElementById('playlist-modal'), closePlaylist = document.getElementById('closePlaylist'), playlistContainer = document.getElementById('playlistContainer'), manualTitleInput = document.getElementById('manualTitleInput'), aiFixTitleBtn = document.getElementById('aiFixTitleBtn');
+        const aiAutoBtn = document.getElementById('aiAutoBtn'), aiSyncBtn = document.getElementById('aiSyncBtn'), aiShuffleBtn = document.getElementById('aiShuffleBtn'), fullscreenBtn = document.getElementById('fullscreenBtn'), recBtn = document.getElementById('recBtn'), freeRecBtn = document.getElementById('freeRecBtn'), exportBtn = document.getElementById('exportBtn'), hideUiBtn = document.getElementById('hideUiBtn'), playlistBtn = document.getElementById('playlistBtn'), playlistModal = document.getElementById('playlist-modal'), closePlaylist = document.getElementById('closePlaylist'), playlistContainer = document.getElementById('playlistContainer'), manualTitleInput = document.getElementById('manualTitleInput'), aiFixTitleBtn = document.getElementById('aiFixTitleBtn');
         const exportModal = document.getElementById('export-modal'), closeExportModal = document.getElementById('closeExportModal'), exportVerticalVideoBtn = document.getElementById('exportVerticalVideoBtn'), exportImageBtn = document.getElementById('exportImageBtn');
         const openMenuDrawerBtn = document.getElementById('openMenuDrawerBtn'), closeMenuDrawerBtn = document.getElementById('closeMenuDrawerBtn'), sideMenuDrawer = document.getElementById('side-menu-drawer'), openStylesModalBtn = document.getElementById('openStylesModalBtn'), closeStylesModalBtn = document.getElementById('closeStylesModalBtn'), stylesModal = document.getElementById('styles-modal'), styleCards = document.querySelectorAll('.style-card[data-style]');
         const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), trackInfo = document.getElementById('track-info'), centerBadge = document.getElementById('center-badge');
 
         let audioCtx, analyser, source, dataArray, currentStyle = 'gemini_5d_cosmos', orbitAngle = 0, aiColorTimer = 0, currentAiColor = '#00ffff', isChromaMode = false, customBgActive = true, loadedBgImage = new Image();
         
-        // تحميل صورتك كخلفية افتراضية تلقائية[span_10](start_span)[span_10](end_span)
         loadedBgImage.src = 'my-photo.jpg';
         loadedBgImage.onload = () => {
             document.body.style.backgroundImage = `url('my-photo.jpg')`;
@@ -301,12 +293,12 @@
             document.body.style.backgroundPosition = 'center 22%';
         };
 
-        let aiAutoActive = true, aiSyncActive = true, textPosX = 50, textPosY = 55, aiShuffleActive = false, shuffleInterval = null, mediaRecorder, recordedChunks = [], isRecording = false, particles = [], smokeParticles = [], MAX_PARTICLES = 12, MAX_SMOKE = 8, backgroundModeTimer = 0, currentBgMode = 'snow';
+        let aiAutoActive = true, aiSyncActive = true, textPosX = 50, textPosY = 55, aiShuffleActive = false, shuffleInterval = null, mediaRecorder, recordedChunks = [], isRecording = false, isFreeRecording = false, particles = [], smokeParticles = [], MAX_PARTICLES = 12, MAX_SMOKE = 8, backgroundModeTimer = 0, currentBgMode = 'snow';
 
         openMenuDrawerBtn.addEventListener('click', () => sideMenuDrawer.classList.add('active'));
         closeMenuDrawerBtn.addEventListener('click', () => sideMenuDrawer.classList.remove('active'));
 
-        templatesMenuBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); customTextModal.classList.remove('active'); wavePositionModal.classList.remove('active'); playlistModal.classList.remove('active'); exportModal.classList.remove('active'); stylesModal.classList.remove('active'); textPositionModal.classList.remove('active'); templatesModal.classList.toggle('active'); renderTemplatesUI(); });
+        templatesMenuBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); templatesModal.classList.toggle('active'); renderTemplatesUI(); });
         closeTemplatesModal.addEventListener('click', () => templatesModal.classList.remove('active'));
         
         saveTemplateBtn.addEventListener('click', () => {
@@ -344,7 +336,7 @@
             templatesModal.classList.remove('active'); alert(`✨ تم تطبيق القالب "${t.name}" بنجاح!`);
         };
 
-        customTextMenuBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); wavePositionModal.classList.remove('active'); playlistModal.classList.remove('active'); exportModal.classList.remove('active'); stylesModal.classList.remove('active'); textPositionModal.classList.remove('active'); customTextModal.classList.toggle('active'); });
+        customTextMenuBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); customTextModal.classList.toggle('active'); });
         closeCustomTextModal.addEventListener('click', () => customTextModal.classList.remove('active'));
         
         extraTextInput.addEventListener('input', () => extraCustomText.textContent = extraTextInput.value);
@@ -356,7 +348,7 @@
         selectFontWeight.addEventListener('change', () => extraCustomText.style.fontWeight = selectFontWeight.value);
         rangeExtraY.addEventListener('input', () => { valExtraY.textContent = rangeExtraY.value; extraCustomText.style.top = rangeExtraY.value + 'px'; });
 
-        wavePosBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); customTextModal.classList.remove('active'); playlistModal.classList.remove('active'); exportModal.classList.remove('active'); stylesModal.classList.remove('active'); textPositionModal.classList.remove('active'); wavePositionModal.classList.toggle('active'); });
+        wavePosBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); wavePositionModal.classList.toggle('active'); });
         closeWavePosModal.addEventListener('click', () => wavePositionModal.classList.remove('active'));
         
         rangeScale.addEventListener('input', () => { waveScalePercent = rangeScale.value; valScale.textContent = waveScalePercent; });
@@ -389,8 +381,8 @@
         window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
         function initElements() {
-            particles = []; for (let i = 0; i < MAX_PARTICLES; i++) resetParticle(i, true);
-            smokeParticles = []; for (let i = 0; i < MAX_SMOKE; i++) resetSmoke(i, true);
+            particles = []; for (let i = 0; i < 12; i++) resetParticle(i, true);
+            smokeParticles = []; for (let i = 0; i < 8; i++) resetSmoke(i, true);
         }
         function resetParticle(index, randomY = false) {
             const w = canvas.width / window.devicePixelRatio, h = canvas.height / window.devicePixelRatio;
@@ -405,11 +397,11 @@
             const syncMultiplier = aiSyncActive ? 2.8 : 1.4, bassFactor = (bassVolume / 140) * syncMultiplier;
             backgroundModeTimer++; if (backgroundModeTimer % 350 === 0) currentBgMode = currentBgMode === 'snow' ? 'hearts' : 'snow';
             smokeParticles.forEach((s, i) => {
-                s.y += s.speedY * (1 + bassFactor * 0.3) * globalWaveSpeed; if (s.y < -50) resetSmoke(i, false);
+                s.y += s.speedY * (1 + bassFactor * 0.3) * (window.globalWaveSpeed || 1); if (s.y < -50) resetSmoke(i, false);
                 ctx.save(); ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2); ctx.fillStyle = currentAiColor; ctx.globalAlpha = s.alpha * 0.5; ctx.filter = 'blur(12px)'; ctx.fill(); ctx.restore();
             });
             particles.forEach((p, i) => {
-                p.x += p.speedX * syncMultiplier * 0.8 * globalWaveSpeed; p.y += p.speedY * (1 + bassFactor * 0.8) * globalWaveSpeed;
+                p.x += p.speedX * syncMultiplier * 0.8 * (window.globalWaveSpeed || 1); p.y += p.speedY * (1 + bassFactor * 0.8) * (window.globalWaveSpeed || 1);
                 if (p.y > h || p.x < 0 || p.x > w) resetParticle(i, false);
                 ctx.save(); ctx.globalAlpha = p.alpha;
                 if (currentBgMode === 'snow') {
@@ -430,7 +422,7 @@
             ctx.fillStyle = color; ctx.shadowBlur = 6; ctx.shadowColor = color; ctx.fill(); ctx.restore();
         }
 
-        textPosBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); customTextModal.classList.remove('active'); playlistModal.classList.remove('active'); exportModal.classList.remove('active'); stylesModal.classList.remove('active'); wavePositionModal.classList.remove('active'); textPositionModal.classList.toggle('active'); });
+        textPosBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); textPositionModal.classList.toggle('active'); });
         closeTextPosModal.addEventListener('click', () => textPositionModal.classList.remove('active'));
         rangeX.addEventListener('input', () => { textPosX = rangeX.value; valX.textContent = textPosX; trackInfo.style.left = textPosX + '%'; });
         rangeY.addEventListener('input', () => { textPosY = rangeY.value; valY.textContent = textPosY; trackInfo.style.top = textPosY + 'px'; });
@@ -465,15 +457,24 @@
         function requestFullScreenMode() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => {}); } }
         fullscreenBtn.addEventListener('click', requestFullScreenMode);
 
-        exportBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); customTextModal.classList.remove('active'); playlistModal.classList.remove('active'); textPositionModal.classList.remove('active'); wavePositionModal.classList.remove('active'); exportModal.classList.toggle('active'); });
+        exportBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); exportModal.classList.toggle('active'); });
         closeExportModal.addEventListener('click', () => exportModal.classList.remove('active'));
         exportImageBtn.addEventListener('click', () => { exportModal.classList.remove('active'); const link = document.createElement('a'); link.download = 'AJN_studio_pro_snapshot.png'; link.href = canvas.toDataURL('image/png'); link.click(); alert("✨ تم حفظ لقطة الشاشة بدقة عالية!"); });
         exportVerticalVideoBtn.addEventListener('click', () => { exportModal.classList.remove('active'); startCustomRecording(1080, 1920, 'AJN_Studio_Vertical_Reels.webm'); });
 
+        // 1. التسجيل من البداية (يعيد الصوت للصفر)
         async function startCustomRecording(targetWidth, targetHeight, fileName) {
             if (!audioCtx) initAudioContext();
-            if (audio.paused) { audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); }
+            audio.currentTime = 0; // رجوع للصوت من البداية
+            if (audio.paused) { 
+                audio.play(); 
+                playBtn.textContent = "⏸ إيقاف"; 
+                requestFullScreenMode(); 
+            }
+            
+            document.body.classList.add('hidden-ui');
             sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); customTextModal.classList.remove('active'); playlistModal.classList.remove('active'); exportModal.classList.remove('active'); textPositionModal.classList.remove('active'); wavePositionModal.classList.remove('active'); stylesModal.classList.remove('active');
+            
             const exportCanvas = document.createElement('canvas'); exportCanvas.width = targetWidth; exportCanvas.height = targetHeight; const expCtx = exportCanvas.getContext('2d');
             recordedChunks = []; const exportStream = exportCanvas.captureStream(30); const destNode = audioCtx.createMediaStreamDestination(); source.connect(destNode);
             const combinedStream = new MediaStream([...exportStream.getVideoTracks(), ...destNode.stream.getAudioTracks()]);
@@ -481,20 +482,41 @@
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
             mediaRecorder.onstop = () => {
                 const blob = new Blob(recordedChunks, { type: 'video/webm' }); const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = fileName; a.click(); alert(`🎬 تم تصدير فيديو الاستوديو العمودي بنجاح!`);
+                const a = document.createElement('a'); a.href = url; a.download = fileName; a.click(); alert(`🎬 تم تصدير الفيديو بنجاح!`);
+                document.body.classList.remove('hidden-ui');
             };
             mediaRecorder.start(); isRecording = true; recBtn.textContent = "🎥 إيقاف التسجيل"; recBtn.classList.add('recording');
+            
             function recordLoop() {
                 if (!isRecording) return;
                 expCtx.clearRect(0, 0, targetWidth, targetHeight);
+                
                 if (customBgActive && loadedBgImage) {
+                    let midSum = 0; 
+                    const bufferLength = analyser ? analyser.frequencyBinCount : 0;
+                    if (dataArray && bufferLength > 0) {
+                        const midStart = Math.floor(bufferLength * 0.15), midEnd = Math.floor(bufferLength * 0.45);
+                        for (let i = midStart; i < midEnd; i++) midSum += dataArray[i];
+                    }
+                    const currentMidVol = midSum / (Math.floor(bufferLength * 0.3) || 1);
+                    const shakeX = currentMidVol > 35 ? (Math.random() - 0.5) * (currentMidVol / 15) : 0;
+                    const shakeY = currentMidVol > 35 ? (Math.random() - 0.5) * (currentMidVol / 15) : 0;
+
                     const imgRatio = loadedBgImage.width / loadedBgImage.height, targetRatio = targetWidth / targetHeight;
-                    let drawW = targetWidth, drawH = targetHeight, drawX = 0, drawY = 0;
-                    if (imgRatio > targetRatio) { drawW = targetHeight * imgRatio; drawX = (targetWidth - drawW) / 2; } else { drawH = targetWidth / imgRatio; drawY = (targetHeight - drawH) / 2; }
+                    let drawW, drawH, drawX, drawY;
+                    if (imgRatio > targetRatio) {
+                        drawH = targetHeight; drawW = drawH * imgRatio;
+                        drawX = (targetWidth - drawW) / 2 + shakeX; drawY = 0 + shakeY;
+                    } else {
+                        drawW = targetWidth; drawH = drawW / imgRatio;
+                        drawX = 0 + shakeX; drawY = (targetHeight * 0.22) + shakeY;
+                    }
                     expCtx.drawImage(loadedBgImage, drawX, drawY, drawW, drawH);
                 } else if (isChromaMode) { expCtx.fillStyle = document.body.style.backgroundColor || '#00FF00'; expCtx.fillRect(0, 0, targetWidth, targetHeight); }
                 else { const bgGrad = expCtx.createRadialGradient(targetWidth/2, targetHeight/2, 40, targetWidth/2, targetHeight/2, targetWidth*0.75); bgGrad.addColorStop(0, '#0f081c'); bgGrad.addColorStop(1, '#020205'); expCtx.fillStyle = bgGrad; expCtx.fillRect(0, 0, targetWidth, targetHeight); }
+                
                 expCtx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+                
                 const customTextStr = extraTextInput.value;
                 if (customTextStr) {
                     expCtx.save(); const scaleYFactor = targetHeight / window.innerHeight;
@@ -503,110 +525,13 @@
                     expCtx.shadowBlur = parseInt(rangeExtraGlow.value) * scaleYFactor; expCtx.shadowColor = extraGlowColor.value || '#00ffff';
                     expCtx.fillText(customTextStr, targetWidth / 2, parseInt(rangeExtraY.value) * scaleYFactor); expCtx.restore();
                 }
-                const recCenterX = (targetWidth / 2) + waveOffsetX, recCenterY = (targetHeight / 2) + waveOffsetY, recLogoScale = logoScalePercent / 100;
+                
+                const scaleFactor = targetHeight / window.innerHeight;
+                const recCenterX = (targetWidth / 2) + (waveOffsetX * scaleFactor);
+                const recCenterY = (targetHeight / 2) + (waveOffsetY * scaleFactor);
+                const recLogoScale = (logoScalePercent / 100) * scaleFactor;
+                
                 expCtx.save(); expCtx.translate(recCenterX, recCenterY); expCtx.scale(recLogoScale, recLogoScale);
-                expCtx.beginPath(); expCtx.arc(0, 0, 40, 0, Math.PI * 2); expCtx.fillStyle = 'rgba(18, 18, 26, 0.95)'; expCtx.strokeStyle = currentAiColor; expCtx.lineWidth = 3; expCtx.shadowBlur = 20; expCtx.shadowColor = currentAiColor; expCtx.fill(); expCtx.stroke();
-                expCtx.font = "bold 18px Tahoma"; expCtx.fillStyle = "#fff"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle"; expCtx.fillText("AJN", 0, -5);
-                expCtx.font = "10px Tahoma"; expCtx.fillStyle = "#aaa"; expCtx.fillText("البصراوي", 0, 12); expCtx.restore();
-                const titleText = trackInfo.textContent || "علاء البصراوي - استوديو ظل الروح";
-                expCtx.save(); expCtx.font = "bold 16px Tahoma"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle";
-                const textWidth = expCtx.measureText(titleText).width + 50, boxX = (targetWidth * (textPosX / 100)) - (textWidth / 2), boxY = textPosY * (targetHeight / window.innerHeight);
-                expCtx.beginPath(); expCtx.roundRect(boxX, boxY, textWidth, 40, 20); expCtx.fillStyle = "rgba(0, 0, 0, 0.85)"; expCtx.strokeStyle = "rgba(0, 255, 255, 0.6)"; expCtx.lineWidth = 2; expCtx.shadowBlur = 15; expCtx.shadowColor = "rgba(0,0,0,0.9)"; expCtx.fill(); expCtx.stroke();
-                expCtx.fillStyle = "#00ffff"; expCtx.shadowBlur = 8; expCtx.shadowColor = "#00ffff"; expCtx.fillText(titleText, boxX + (textWidth / 2), boxY + 20); expCtx.restore();
-                requestAnimationFrame(recordLoop);
-            }
-            recordLoop();
-        }
-
-        recBtn.addEventListener('click', () => { if (!isRecording) startCustomRecording(canvas.width, canvas.height, 'AJN_Studio_Recording.webm'); else stopActiveRecording(); });
-        function stopActiveRecording() { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); isRecording = false; recBtn.textContent = "🎥 تسجيل"; recBtn.classList.remove('recording'); document.body.classList.remove('hidden-ui'); }
-        window.addEventListener('dblclick', () => { if (isRecording) stopActiveRecording(); else document.body.classList.toggle('hidden-ui'); });
-
-        playlistBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); customTextModal.classList.remove('active'); exportModal.classList.remove('active'); textPositionModal.classList.remove('active'); wavePositionModal.classList.remove('active'); playlistModal.classList.toggle('active'); });
-        closePlaylist.addEventListener('click', () => playlistModal.classList.remove('active'));
-        hideUiBtn.addEventListener('click', () => { document.body.classList.add('hidden-ui'); sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); customTextModal.classList.remove('active'); playlistModal.classList.remove('active'); exportModal.classList.remove('active'); textPositionModal.classList.remove('active'); wavePositionModal.classList.remove('active'); stylesModal.classList.remove('active'); requestFullScreenMode(); });
-
-        multiAudioFile.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files); if (files.length === 0) return;
-            files.forEach(file => playlist.push({ name: file.name.replace(/\.[^/.]+$/, ""), file: file })); 
-            renderPlaylistUI();
-        });
-
-        function renderPlaylistUI() {
-            playlistContainer.innerHTML = '';
-            if (playlist.length === 0) { playlistContainer.innerHTML = '<div style="color: #aaa; text-align: center; padding: 10px; font-size: 11px; font-weight:bold;">لم يتم تحميل ملفات صوتية بعد</div>'; return; }
-            playlist.forEach((track, index) => {
-                const div = document.createElement('div'); div.className = 'playlist-item'; if (index === currentTrackIndex) div.classList.add('active');
-                div.innerHTML = `<span>${index + 1}. ${track.name}</span> ${index === currentTrackIndex ? '<span style="color:#27ae60;">● يعمل</span>' : ''}`;
-                div.onclick = () => { currentTrackIndex = index; loadTrack(currentTrackIndex); audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); renderPlaylistUI(); };
-                playlistContainer.appendChild(div);
-            });
-        }
-
-        function loadTrack(index) {
-            if (!playlist[index]) return; const track = playlist[index];
-            manualTitleInput.value = track.name; trackInfo.textContent = "يعمل الآن: " + track.name;
-            if (track.file) { audio.src = URL.createObjectURL(track.file); } else { audio.src = track.url; }
-            initAudioContext(); playBtn.disabled = false;
-        }
-
-        manualTitleInput.addEventListener('input', () => { if (manualTitleInput.value.trim()) trackInfo.textContent = "يعمل الآن: " + manualTitleInput.value.trim(); });
-        
-        aiFixTitleBtn.addEventListener('click', () => {
-            let currentText = manualTitleInput.value.trim() || (playlist[currentTrackIndex] ? playlist[currentTrackIndex].name : "");
-            if (!currentText) { alert("الرجاء تحميل ملف صوتي أو إدخال نص أولاً!"); return; }
-            let cleaned = currentText.replace(/[_.-]/g, ' ').replace(/\s+/g, ' ').trim();
-            if (!cleaned.includes("علاء البصراوي")) cleaned += " - علاء البصراوي";
-            manualTitleInput.value = cleaned; trackInfo.textContent = "يعمل الآن: " + cleaned; alert("✨ تمت عملية التصحيح والتنسيق الذكي بنجاح!");
-        });
-
-        audio.addEventListener('ended', () => { if (playlist.length > 0) { currentTrackIndex = (currentTrackIndex + 1) % playlist.length; loadTrack(currentTrackIndex); audio.play(); requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderPlaylistUI(); } });
-
-        function initAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser(); source = audioCtx.createMediaElementSource(audio);
-                source.connect(analyser); analyser.connect(audioCtx.destination); analyser.fftSize = 256;
-            }
-        }
-
-        playBtn.addEventListener('click', () => {
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            if (audio.paused) { audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); }
-            else { audio.pause(); playBtn.textContent = "▶ تشغيل"; document.body.classList.remove('hidden-ui'); }
-        });
-
-        function renderFrame() {
-            if (audio.paused) return; requestAnimationFrame(renderFrame);
-            const bufferLength = analyser.frequencyBinCount; if (!dataArray) dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
-            const displayWidth = canvas.clientWidth, displayHeight = canvas.clientHeight; ctx.clearRect(0, 0, displayWidth, displayHeight);
-            aiColorTimer++; const speedFactor = aiSyncActive ? 3.0 : 1.5;
-            if (aiAutoActive && aiColorTimer % Math.max(1, Math.floor(8 / speedFactor)) === 0) {
-                const waveColors = ['#00ffff', '#ff007f', '#ffcc00', '#9b59b6', '#00ffcc', '#3498db', '#e74c3c'];
-                currentAiColor = waveColors[Math.floor(Math.random() * waveColors.length)];
-                centerBadge.style.borderColor = currentAiColor; centerBadge.style.boxShadow = `0 0 22px ${currentAiColor}`;
-                if (!isChromaMode && !customBgActive) {
-                    ctx.save(); const bgGrad = ctx.createRadialGradient(displayWidth/2, displayHeight/2, 40, displayWidth/2, displayHeight/2, displayWidth*0.75);
-                    bgGrad.addColorStop(0, '#0f081c'); bgGrad.addColorStop(1, '#020205'); ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, displayWidth, displayHeight); ctx.restore();
-                }
-            }
-            let midSum = 0; const midStart = Math.floor(bufferLength * 0.15), midEnd = Math.floor(bufferLength * 0.45);
-            for (let i = midStart; i < midEnd; i++) midSum += dataArray[i]; const midVolume = midSum / (midEnd - midStart);
-            let bassSum = 0; for (let i = 0; i < 15; i++) bassSum += dataArray[i]; const bassVolume = bassSum / 15;
-            if (customBgActive && midVolume > 35) document.body.style.backgroundPosition = `calc(50% + ${(Math.random() - 0.5) * (midVolume / 18)}px) calc(22% + ${(Math.random() - 0.5) * (midVolume / 18)}px)`;
-            else document.body.style.backgroundPosition = 'center 22%';
-
-            updateAndRenderEnvironment(bassVolume);
-            orbitAngle += (0.05 + (bassVolume / 220)) * speedFactor * globalWaveSpeed;
-            const centerX = (displayWidth / 2) + waveOffsetX, centerY = (displayHeight / 2) + waveOffsetY;
-            const maxAllowedRadius = (Math.min(displayWidth, displayHeight) * 0.45) * (waveScalePercent / 100);
-            const dynamicScaleFactor = Math.min(1.15, 0.7 + (bassVolume / 220)) * (waveScalePercent / 100);
-
-            ctx.save(); ctx.translate(centerX, centerY);
-            renderWaveStyle(ctx, currentStyle, currentAiColor, currentAiColor, maxAllowedRadius, dynamicScaleFactor, bassVolume, orbitAngle, dataArray, bufferLength);
-            ctx.restore();
-        }
-    </script>
-</body>
-</html>
+                expCtx.beginPath(); expCtx.arc(0, 0, 60, 0, Math.PI * 2); 
+                expCtx.fillStyle = 'rgba(18, 18, 26, 0.95)'; expCtx.strokeStyle = currentAiColor; expCtx.lineWidth = 3; 
+                expCtx.shadowBlur = 22; e
