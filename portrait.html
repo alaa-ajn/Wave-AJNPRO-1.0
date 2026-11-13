@@ -534,4 +534,234 @@
                 expCtx.save(); expCtx.translate(recCenterX, recCenterY); expCtx.scale(recLogoScale, recLogoScale);
                 expCtx.beginPath(); expCtx.arc(0, 0, 60, 0, Math.PI * 2); 
                 expCtx.fillStyle = 'rgba(18, 18, 26, 0.95)'; expCtx.strokeStyle = currentAiColor; expCtx.lineWidth = 3; 
-                expCtx.shadowBlur = 22; e
+                expCtx.shadowBlur = 22; expCtx.shadowColor = currentAiColor; expCtx.fill(); expCtx.stroke();
+                expCtx.font = "bold 22px Tahoma"; expCtx.fillStyle = "#fff"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle"; expCtx.fillText("AJN", 0, -8);
+                expCtx.font = "11px Tahoma"; expCtx.fillStyle = "#aaa"; expCtx.fillText("البصراوي", 0, 14); expCtx.restore();
+                
+                const titleText = trackInfo.textContent || "علاء البصراوي - دلع حبيبي";
+                expCtx.save(); expCtx.font = "bold 16px Tahoma"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle";
+                const textWidth = expCtx.measureText(titleText).width + 50, boxX = (targetWidth * (textPosX / 100)) - (textWidth / 2), boxY = textPosY * scaleFactor;
+                expCtx.beginPath(); expCtx.roundRect(boxX, boxY, textWidth, 42, 21); 
+                expCtx.fillStyle = "rgba(0, 0, 0, 0.85)"; expCtx.strokeStyle = "rgba(0, 255, 255, 0.6)"; expCtx.lineWidth = 2; 
+                expCtx.shadowBlur = 15; expCtx.shadowColor = "rgba(0,0,0,0.9)"; expCtx.fill(); expCtx.stroke();
+                expCtx.fillStyle = "#00ffff"; expCtx.shadowBlur = 8; expCtx.shadowColor = "#00ffff"; expCtx.fillText(titleText, boxX + (textWidth / 2), boxY + 21); expCtx.restore();
+                
+                requestAnimationFrame(recordLoop);
+            }
+            recordLoop();
+        }
+
+        // 2. التسجيل الحر (من أي وقت وبدون إرجاع الصوت للبداية)
+        async function startFreeRecording(targetWidth, targetHeight, fileName) {
+            if (!audioCtx) initAudioContext();
+            if (audio.paused) { 
+                audio.play(); 
+                playBtn.textContent = "⏸ إيقاف"; 
+                requestFullScreenMode(); 
+            }
+            
+            document.body.classList.add('hidden-ui');
+            sideMenuDrawer.classList.remove('active'); templatesModal.classList.remove('active'); customTextModal.classList.remove('active'); playlistModal.classList.remove('active'); exportModal.classList.remove('active'); textPositionModal.classList.remove('active'); wavePositionModal.classList.remove('active'); stylesModal.classList.remove('active');
+            
+            const exportCanvas = document.createElement('canvas'); exportCanvas.width = targetWidth; exportCanvas.height = targetHeight; const expCtx = exportCanvas.getContext('2d');
+            recordedChunks = []; const exportStream = exportCanvas.captureStream(30); const destNode = audioCtx.createMediaStreamDestination(); source.connect(destNode);
+            const combinedStream = new MediaStream([...exportStream.getVideoTracks(), ...destNode.stream.getAudioTracks()]);
+            try { mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus' }); } catch (e) { try { mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' }); } catch (err) { mediaRecorder = new MediaRecorder(combinedStream); } }
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' }); const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = fileName; a.click(); alert(`🎬 تم تصدير الفيديو الحر بنجاح!`);
+                document.body.classList.remove('hidden-ui');
+            };
+            mediaRecorder.start(); isFreeRecording = true; freeRecBtn.textContent = "⏺ إيقاف الحر"; freeRecBtn.classList.add('recording');
+            
+            function freeRecordLoop() {
+                if (!isFreeRecording) return;
+                expCtx.clearRect(0, 0, targetWidth, targetHeight);
+                
+                if (customBgActive && loadedBgImage) {
+                    let midSum = 0; 
+                    const bufferLength = analyser ? analyser.frequencyBinCount : 0;
+                    if (dataArray && bufferLength > 0) {
+                        const midStart = Math.floor(bufferLength * 0.15), midEnd = Math.floor(bufferLength * 0.45);
+                        for (let i = midStart; i < midEnd; i++) midSum += dataArray[i];
+                    }
+                    const currentMidVol = midSum / (Math.floor(bufferLength * 0.3) || 1);
+                    const shakeX = currentMidVol > 35 ? (Math.random() - 0.5) * (currentMidVol / 15) : 0;
+                    const shakeY = currentMidVol > 35 ? (Math.random() - 0.5) * (currentMidVol / 15) : 0;
+
+                    const imgRatio = loadedBgImage.width / loadedBgImage.height, targetRatio = targetWidth / targetHeight;
+                    let drawW, drawH, drawX, drawY;
+                    if (imgRatio > targetRatio) {
+                        drawH = targetHeight; drawW = drawH * imgRatio;
+                        drawX = (targetWidth - drawW) / 2 + shakeX; drawY = 0 + shakeY;
+                    } else {
+                        drawW = targetWidth; drawH = drawW / imgRatio;
+                        drawX = 0 + shakeX; drawY = (targetHeight * 0.22) + shakeY;
+                    }
+                    expCtx.drawImage(loadedBgImage, drawX, drawY, drawW, drawH);
+                } else if (isChromaMode) { expCtx.fillStyle = document.body.style.backgroundColor || '#00FF00'; expCtx.fillRect(0, 0, targetWidth, targetHeight); }
+                else { const bgGrad = expCtx.createRadialGradient(targetWidth/2, targetHeight/2, 40, targetWidth/2, targetHeight/2, targetWidth*0.75); bgGrad.addColorStop(0, '#0f081c'); bgGrad.addColorStop(1, '#020205'); expCtx.fillStyle = bgGrad; expCtx.fillRect(0, 0, targetWidth, targetHeight); }
+                
+                expCtx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+                
+                const customTextStr = extraTextInput.value;
+                if (customTextStr) {
+                    expCtx.save(); const scaleYFactor = targetHeight / window.innerHeight;
+                    expCtx.font = `${selectFontWeight.value} ${parseInt(rangeExtraSize.value) * scaleYFactor}px Tahoma`;
+                    expCtx.fillStyle = extraTextColor.value || '#ffffff'; expCtx.textAlign = "center"; expCtx.textBaseline = "middle";
+                    expCtx.shadowBlur = parseInt(rangeExtraGlow.value) * scaleYFactor; expCtx.shadowColor = extraGlowColor.value || '#00ffff';
+                    expCtx.fillText(customTextStr, targetWidth / 2, parseInt(rangeExtraY.value) * scaleYFactor); expCtx.restore();
+                }
+                
+                const scaleFactor = targetHeight / window.innerHeight;
+                const recCenterX = (targetWidth / 2) + (waveOffsetX * scaleFactor);
+                const recCenterY = (targetHeight / 2) + (waveOffsetY * scaleFactor);
+                const recLogoScale = (logoScalePercent / 100) * scaleFactor;
+                
+                expCtx.save(); expCtx.translate(recCenterX, recCenterY); expCtx.scale(recLogoScale, recLogoScale);
+                expCtx.beginPath(); expCtx.arc(0, 0, 60, 0, Math.PI * 2); 
+                expCtx.fillStyle = 'rgba(18, 18, 26, 0.95)'; expCtx.strokeStyle = currentAiColor; expCtx.lineWidth = 3; 
+                expCtx.shadowBlur = 22; expCtx.shadowColor = currentAiColor; expCtx.fill(); expCtx.stroke();
+                expCtx.font = "bold 22px Tahoma"; expCtx.fillStyle = "#fff"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle"; expCtx.fillText("AJN", 0, -8);
+                expCtx.font = "11px Tahoma"; expCtx.fillStyle = "#aaa"; expCtx.fillText("البصراوي", 0, 14); expCtx.restore();
+                
+                const titleText = trackInfo.textContent || "علاء البصراوي - دلع حبيبي";
+                expCtx.save(); expCtx.font = "bold 16px Tahoma"; expCtx.textAlign = "center"; expCtx.textBaseline = "middle";
+                const textWidth = expCtx.measureText(titleText).width + 50, boxX = (targetWidth * (textPosX / 100)) - (textWidth / 2), boxY = textPosY * scaleFactor;
+                expCtx.beginPath(); expCtx.roundRect(boxX, boxY, textWidth, 42, 21); 
+                expCtx.fillStyle = "rgba(0, 0, 0, 0.85)"; expCtx.strokeStyle = "rgba(0, 255, 255, 0.6)"; expCtx.lineWidth = 2; 
+                expCtx.shadowBlur = 15; expCtx.shadowColor = "rgba(0,0,0,0.9)"; expCtx.fill(); expCtx.stroke();
+                expCtx.fillStyle = "#00ffff"; expCtx.shadowBlur = 8; expCtx.shadowColor = "#00ffff"; expCtx.fillText(titleText, boxX + (textWidth / 2), boxY + 21); expCtx.restore();
+                
+                requestAnimationFrame(freeRecordLoop);
+            }
+            freeRecordLoop();
+        }
+
+        recBtn.addEventListener('click', () => { 
+            if (!isRecording && !isFreeRecording) {
+                startCustomRecording(canvas.width, canvas.height, 'AJN_Studio_Recording_From_Start.webm'); 
+            } else if (isRecording) {
+                stopActiveRecording();
+            }
+        });
+
+        freeRecBtn.addEventListener('click', () => { 
+            if (!isRecording && !isFreeRecording) {
+                startFreeRecording(canvas.width, canvas.height, 'AJN_Studio_Free_Recording.webm'); 
+            } else if (isFreeRecording) {
+                stopFreeActiveRecording();
+            }
+        });
+
+        function stopActiveRecording() { 
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); 
+            isRecording = false; 
+            recBtn.textContent = "🎥 من البداية"; 
+            recBtn.classList.remove('recording'); 
+            document.body.classList.remove('hidden-ui'); 
+        }
+
+        function stopFreeActiveRecording() { 
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); 
+            isFreeRecording = false; 
+            freeRecBtn.textContent = "⏺ تسجيل حر"; 
+            freeRecBtn.classList.remove('recording'); 
+            document.body.classList.remove('hidden-ui'); 
+        }
+
+        window.addEventListener('dblclick', () => { 
+            if (isRecording) stopActiveRecording(); 
+            else if (isFreeRecording) stopFreeActiveRecording();
+            else document.body.classList.toggle('hidden-ui'); 
+        });
+
+        playlistBtn.addEventListener('click', () => { sideMenuDrawer.classList.remove('active'); playlistModal.classList.toggle('active'); });
+        closePlaylist.addEventListener('click', () => playlistModal.classList.remove('active'));
+        hideUiBtn.addEventListener('click', () => { document.body.classList.add('hidden-ui'); sideMenuDrawer.classList.remove('active'); requestFullScreenMode(); });
+
+        multiAudioFile.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files); if (files.length === 0) return;
+            files.forEach(file => playlist.push({ name: file.name.replace(/\.[^/.]+$/, ""), file: file })); 
+            renderPlaylistUI();
+        });
+
+        function renderPlaylistUI() {
+            playlistContainer.innerHTML = '';
+            if (playlist.length === 0) { playlistContainer.innerHTML = '<div style="color: #aaa; text-align: center; padding: 10px; font-size: 11px; font-weight:bold;">لم يتم تحميل ملفات صوتية بعد</div>'; return; }
+            playlist.forEach((track, index) => {
+                const div = document.createElement('div'); div.className = 'playlist-item'; if (index === currentTrackIndex) div.classList.add('active');
+                div.innerHTML = `<span>${index + 1}. ${track.name}</span> ${index === currentTrackIndex ? '<span style="color:#27ae60;">● يعمل</span>' : ''}`;
+                div.onclick = () => { currentTrackIndex = index; loadTrack(currentTrackIndex); audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); renderPlaylistUI(); };
+                playlistContainer.appendChild(div);
+            });
+        }
+
+        function loadTrack(index) {
+            if (!playlist[index]) return; const track = playlist[index];
+            manualTitleInput.value = track.name; trackInfo.textContent = "يعمل الآن: " + track.name;
+            if (track.file) { audio.src = URL.createObjectURL(track.file); } else { audio.src = track.url; }
+            initAudioContext(); playBtn.disabled = false;
+        }
+
+        manualTitleInput.addEventListener('input', () => { if (manualTitleInput.value.trim()) trackInfo.textContent = "يعمل الآن: " + manualTitleInput.value.trim(); });
+        
+        aiFixTitleBtn.addEventListener('click', () => {
+            let currentText = manualTitleInput.value.trim() || (playlist[currentTrackIndex] ? playlist[currentTrackIndex].name : "");
+            if (!currentText) { alert("الرجاء تحميل ملف صوتي أو إدخال نص أولاً!"); return; }
+            let cleaned = currentText.replace(/[_.-]/g, ' ').replace(/\s+/g, ' ').trim();
+            if (!cleaned.includes("علاء البصراوي")) cleaned += " - علاء البصراوي";
+            manualTitleInput.value = cleaned; trackInfo.textContent = "يعمل الآن: " + cleaned; alert("✨ تمت عملية التصحيح والتنسيق الذكي بنجاح!");
+        });
+
+        audio.addEventListener('ended', () => { if (playlist.length > 0) { currentTrackIndex = (currentTrackIndex + 1) % playlist.length; loadTrack(currentTrackIndex); audio.play(); requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderPlaylistUI(); } });
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser(); source = audioCtx.createMediaElementSource(audio);
+                source.connect(analyser); analyser.connect(audioCtx.destination); analyser.fftSize = 256;
+            }
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            if (audio.paused) { audio.play(); playBtn.textContent = "⏸ إيقاف"; requestFullScreenMode(); document.body.classList.add('hidden-ui'); renderFrame(); }
+            else { audio.pause(); playBtn.textContent = "▶ تشغيل"; document.body.classList.remove('hidden-ui'); }
+        });
+
+        function renderFrame() {
+            if (audio.paused) return; requestAnimationFrame(renderFrame);
+            const bufferLength = analyser.frequencyBinCount; if (!dataArray) dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+            const displayWidth = canvas.clientWidth, displayHeight = canvas.clientHeight; ctx.clearRect(0, 0, displayWidth, displayHeight);
+            aiColorTimer++; const speedFactor = aiSyncActive ? 3.0 : 1.5;
+            if (aiAutoActive && aiColorTimer % Math.max(1, Math.floor(8 / speedFactor)) === 0) {
+                const waveColors = ['#00ffff', '#ff007f', '#ffcc00', '#9b59b6', '#00ffcc', '#3498db', '#e74c3c'];
+                currentAiColor = waveColors[Math.floor(Math.random() * waveColors.length)];
+                centerBadge.style.borderColor = currentAiColor; centerBadge.style.boxShadow = `0 0 22px ${currentAiColor}`;
+                if (!isChromaMode && !customBgActive) {
+                    ctx.save(); const bgGrad = ctx.createRadialGradient(displayWidth/2, displayHeight/2, 40, displayWidth/2, displayHeight/2, displayWidth*0.75);
+                    bgGrad.addColorStop(0, '#0f081c'); bgGrad.addColorStop(1, '#020205'); ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, displayWidth, displayHeight); ctx.restore();
+                }
+            }
+            let midSum = 0; const midStart = Math.floor(bufferLength * 0.15), midEnd = Math.floor(bufferLength * 0.45);
+            for (let i = midStart; i < midEnd; i++) midSum += dataArray[i]; const midVolume = midSum / (midEnd - midStart);
+            let bassSum = 0; for (let i = 0; i < 15; i++) bassSum += dataArray[i]; const bassVolume = bassSum / 15;
+            if (customBgActive && midVolume > 35) document.body.style.backgroundPosition = `calc(50% + ${(Math.random() - 0.5) * (midVolume / 18)}px) calc(22% + ${(Math.random() - 0.5) * (midVolume / 18)}px)`;
+            else document.body.style.backgroundPosition = 'center 22%';
+
+            updateAndRenderEnvironment(bassVolume);
+            orbitAngle += (0.05 + (bassVolume / 220)) * speedFactor * (window.globalWaveSpeed || 1);
+            const centerX = (displayWidth / 2) + waveOffsetX, centerY = (displayHeight / 2) + waveOffsetY;
+            const maxAllowedRadius = (Math.min(displayWidth, displayHeight) * 0.45) * (waveScalePercent / 100);
+            const dynamicScaleFactor = Math.min(1.15, 0.7 + (bassVolume / 220)) * (waveScalePercent / 100);
+
+            ctx.save(); ctx.translate(centerX, centerY);
+            renderWaveStyle(ctx, currentStyle, currentAiColor, currentAiColor, maxAllowedRadius, dynamicScaleFactor, bassVolume, orbitAngle, dataArray, bufferLength);
+            ctx.restore();
+        }
+    </script>
+</body>
+</html>
